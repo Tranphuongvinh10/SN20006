@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_report_users_groups">
+    <sys_report_users_groups action="INSERT_OR_UPDATE">
+        <group_id/>
+        <report_id display_value="James Greene - VA  Stat report - Request">1c7c6e23db0f10140891a28bd39619ab</report_id>
+        <sys_class_name>sys_report_users_groups</sys_class_name>
+        <sys_created_by>PeterWile</sys_created_by>
+        <sys_created_on>2020-09-10 19:50:07</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>947c6e23db0f10140891a28bd39619ac</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>1c7c6e23db0f10140891a28bd39619ab</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_report_users_groups_947c6e23db0f10140891a28bd39619ac</sys_update_name>
+        <sys_updated_by>PeterWile</sys_updated_by>
+        <sys_updated_on>2020-09-10 19:50:07</sys_updated_on>
+        <user_id display_value="">fad722384f031a48d3e3fcb28110c746</user_id>
+    </sys_report_users_groups>
+</record_update>

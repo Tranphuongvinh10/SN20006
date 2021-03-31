@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_section caption="" section_id="f8b030bedb7058503e225a84dc96199c" sys_domain="global" table="x_sccpl_serv_conn_inbound_definition" version="3" view="">
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>name</element>
+            <position>0</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>751bcf02db691490083750d3dc961975</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.begin_split</element>
+            <position>1</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>f91bcf02db691490083750d3dc961975</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type>.begin_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>number</element>
+            <position>2</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>711bcf02db691490083750d3dc961976</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>definition_partner</element>
+            <position>3</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>f51bcf02db691490083750d3dc961976</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>table</element>
+            <position>4</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>7d1bcf02db691490083750d3dc961976</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>default_cat_item</element>
+            <position>5</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>f11bcf02db691490083750d3dc961977</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>6</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>791bcf02db691490083750d3dc961977</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>order</element>
+            <position>7</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>fd1bcf02db691490083750d3dc961977</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>match_user_name</element>
+            <position>8</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>751bcf02db691490083750d3dc961978</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>user_name</element>
+            <position>9</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>f91bcf02db691490083750d3dc961978</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>template</element>
+            <position>10</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>711bcf02db691490083750d3dc961979</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>active</element>
+            <position>11</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>f51bcf02db691490083750d3dc961979</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.end_split</element>
+            <position>12</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>7d1bcf02db691490083750d3dc961979</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type>.end_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.begin_split</element>
+            <position>13</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>f11bcf02db691490083750d3dc96197a</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type>.begin_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>key_field</element>
+            <position>14</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>791bcf02db691490083750d3dc96197a</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>15</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>fd1bcf02db691490083750d3dc96197a</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.end_split</element>
+            <position>16</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>751bcf02db691490083750d3dc96197b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type>.end_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>condition</element>
+            <position>17</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>f91bcf02db691490083750d3dc96197b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>description</element>
+            <position>18</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>711bcf02db691490083750d3dc96197c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.begin_split</element>
+            <position>19</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>f51bcf02db691490083750d3dc96197c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type>.begin_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>20</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>7d1bcf02db691490083750d3dc96197c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.end_split</element>
+            <position>21</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>f11bcf02db691490083750d3dc96197d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type>.end_split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>advanced_action</element>
+            <position>22</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>791bcf02db691490083750d3dc96197d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>script</element>
+            <position>23</position>
+            <sys_created_by>QuanTH</sys_created_by>
+            <sys_created_on>2020-06-23 16:38:58</sys_created_on>
+            <sys_id>fd1bcf02db691490083750d3dc96197d</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_inbound_definition" sys_domain="global" view="Default view">f8b030bedb7058503e225a84dc96199c</sys_ui_section>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-23 16:38:58</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_section action="INSERT_OR_UPDATE">
+            <caption/>
+            <header>false</header>
+            <name>x_sccpl_serv_conn_inbound_definition</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-05-19 06:32:46</sys_created_on>
+            <sys_customer_update>false</sys_customer_update>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>f8b030bedb7058503e225a84dc96199c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_sccpl_serv_conn_inbound_definition</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+            <sys_update_name>sys_ui_section_f8b030bedb7058503e225a84dc96199c</sys_update_name>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-05-19 06:32:46</sys_updated_on>
+            <sys_user/>
+            <title>true</title>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+</record_update>

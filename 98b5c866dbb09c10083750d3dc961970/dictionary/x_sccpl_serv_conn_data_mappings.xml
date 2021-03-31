@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element audit="true" label="Data Mappings" max_length="40" name="x_sccpl_serv_conn_data_mappings" sizeclass="0" type="collection">
+        <element attributes="edge_encryption_enabled=true" default="true" label="Active" max_length="40" name="active" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Definition Partner" max_length="32" name="definition_partner" reference="x_sccpl_serv_conn_definition_partner" type="reference"/>
+        <element label="External Field Name" max_length="200" name="external_field_name" type="string"/>
+        <element label="External Field Value" max_length="300" name="external_field_value" type="string"/>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Integration Type" max_length="40" name="integration_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Inbound" sequence="10" value="inbound"/>
+                <element inactive_on_update="false" label="Outbound" sequence="20" value="outbound"/>
+                <element inactive_on_update="false" label="Both" sequence="30" value="both"/>
+            </choice>
+        </element>
+        <element label="SCC Field Name" max_length="200" name="scc_field_name" type="string"/>
+        <element label="SCC Field Value" max_length="300" name="scc_field_value" type="string"/>
+        <element attributes="base_start=true,edge_encryption_enabled=true" calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" label="Table Name" max_length="80" name="table_name" type="table_name"/>
+        <element calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" label="Target field" max_length="40" name="target_field" type="string"/>
+        <index name="index">
+            <element name="definition_partner"/>
+        </index>
+    </element>
+</database>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_hub_action_type_definition">
+    <sys_hub_action_type_definition action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <action_template/>
+        <active>true</active>
+        <annotation/>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from/>
+        <copied_from_name/>
+        <description/>
+        <ih_action>false</ih_action>
+        <internal_name>sasaa</internal_name>
+        <label_cache/>
+        <latest_snapshot/>
+        <master_snapshot/>
+        <name>sasaa</name>
+        <natlang/>
+        <outputs/>
+        <state>draft</state>
+        <sys_class_name>sys_hub_action_type_definition</sys_class_name>
+        <sys_created_by>VinhTr</sys_created_by>
+        <sys_created_on>2020-06-03 08:41:42</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_id>7b0e9e63db0598d0083750d3dc96191b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>sasaa</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_hub_action_type_definition_7b0e9e63db0598d0083750d3dc96191b</sys_update_name>
+        <sys_updated_by>VinhTr</sys_updated_by>
+        <sys_updated_on>2020-06-03 08:41:42</sys_updated_on>
+        <system_level>false</system_level>
+        <type/>
+    </sys_hub_action_type_definition>
+    <sys_variable_value action="delete_multiple" query="document_key=7b0e9e63db0598d0083750d3dc96191b"/>
+</record_update>

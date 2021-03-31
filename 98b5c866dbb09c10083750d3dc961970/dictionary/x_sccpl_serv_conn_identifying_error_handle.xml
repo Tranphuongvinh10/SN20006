@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element audit="true" label="Identifying Error Handle" max_length="40" name="x_sccpl_serv_conn_identifying_error_handle" sizeclass="0" type="collection">
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Definition Partner" max_length="32" name="definition_partner" reference="x_sccpl_serv_conn_definition_partner" type="reference"/>
+        <element label="Description" max_length="500" name="description" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Error Code" max_length="40" name="error_code" type="integer"/>
+        <element label="Error Message" max_length="500" name="error_message" type="string"/>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Integration Type" max_length="40" name="integration_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Inbound" sequence="10" value="inbound"/>
+                <element inactive_on_update="false" label="Outbound" sequence="20" value="outbound"/>
+                <element inactive_on_update="false" label="Both" sequence="30" value="both"/>
+            </choice>
+        </element>
+        <element display="true" label="Name" mandatory="true" max_length="200" name="name" primary="true" type="string"/>
+        <index name="index">
+            <element name="definition_partner"/>
+        </index>
+    </element>
+</database>

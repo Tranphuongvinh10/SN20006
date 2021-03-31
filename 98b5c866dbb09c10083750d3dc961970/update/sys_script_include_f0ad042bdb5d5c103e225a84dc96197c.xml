@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_sccpl_serv_conn.ServiceConnectorOutboundHelper</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>ServiceConnectorOutboundHelper</name>
+        <script><![CDATA[var ServiceConnectorOutboundHelper = Class.create();
+ServiceConnectorOutboundHelper.prototype = Object.extendsObject(ServiceConnectorModel, {
+    initialize: function () {
+        this.commonAction = new ServiceConnectorCommonAction();
+    },
+
+    /** 
+     * Description : Handle mapping all fields in attribute mapping
+     * @param {object} data this.DATA
+     * @param {object} trigger this.TRIGGER
+     * @returns {object} this.DATA
+     */
+    buildMessage: function (data, previous, trigger) {
+        var k;
+        var dataObj = {};        
+        var gr = new GlideRecord(this.TABLE_NAME.ATTRIBUTE_MAPPING);
+        gr.addQuery("definition_partner", trigger.PARTNER);
+        gr.addQuery("outbound_definition", trigger.OUTBOUND_DEFINITION);
+
+        var typeQuery = gr.addQuery("integration_type", this.INTEGRATION_TYPE.OUTBOUND);
+        typeQuery.addOrCondition("integration_type", this.INTEGRATION_TYPE.BOTH);
+
+        gr.addActiveQuery();
+        gr.query();
+        while (gr.next()) {
+            for (k in data) {
+                if (gr.getValue("external_field") && gr.getValue("scc_field") && gr.getValue("scc_field").toLowerCase() == k.toLowerCase()) {
+                    dataObj[gr.getValue("external_field")] = data.getValue(k) || null;
+                }
+            }
+            if (gr.data_mapping && gr.getValue("scc_field") && data[gr.getValue("scc_field")]) {
+                dataObj[gr.getValue("external_field")] = this.commonAction.dataMappingLookup(this.INTEGRATION_TYPE.OUTBOUND, trigger.TABLE, gr, data.getValue(gr.getValue("scc_field")));
+            }
+            if (gr.advanced) {
+                var evaluator = new GlideScopedEvaluator();
+                evaluator.putVariable("input", data.getValue([gr.getValue("scc_field")]));
+                evaluator.putVariable("message", data);
+                evaluator.putVariable("previous", previous);
+                evaluator.putVariable("trigger", trigger);
+                evaluator.putVariable("output", null);
+
+                evaluator.evaluateScript(gr, "script", null);
+
+                dataObj[gr.getValue("external_field")] = evaluator.getVariable("output");
+            }
+            // Supply check:
+            switch (gr.getValue("supply_value")) {
+                case this.SUPPLY_VALUE.ALWAYS:
+                    break;
+                case this.SUPPLY_VALUE.INSERT_UPDATE:
+                    if (trigger.ACTION != this.SUPPLY_VALUE.INSERT && trigger.ACTION != this.SUPPLY_VALUE.UPDATE) {
+                        delete dataObj[gr.getValue("external_field")];
+                    }
+                    break;
+                case this.SUPPLY_VALUE.INSERT:
+                    if (trigger.ACTION != this.SUPPLY_VALUE.INSERT) {
+                        delete dataObj[gr.getValue("external_field")];
+                    }
+                    break;
+                case this.SUPPLY_VALUE.UPDATE:
+                    if (trigger.ACTION != this.SUPPLY_VALUE.UPDATE) {
+                        delete dataObj[gr.getValue("external_field")];
+                    }
+                    break;
+                default:
+                    this.processError = true;
+                    break;
+            }
+           /*
+			if(dataObj[gr.getValue("external_field")]) {
+                var temp = dataObj[gr.getValue("external_field")];
+                dataObj[gr.getValue("external_field")] = temp.replace(/\n/g, "\\n").replace(/\t/g, "\\t").replace(/(\r\n)/g, "\\r\\n").replace(/\r/g, "\\r").replace(/\"/g, ""); 
+            }
+			*/
+            
+        }
+        return dataObj;
+    },
+
+    /** 
+     * Description : Send integration message to the customer
+     * @param {object} endpoint
+     * @param {string} data
+     * @returns {object}
+     */
+    sendIntegrationMessage: function (endpoint, data) {
+        var timeout = endpoint.timeout.replace(/\W/g, "");
+        var authenticationType = endpoint.authentication + "";
+
+        var request = new sn_ws.RESTMessageV2();
+        this.setRequestHeader(request, endpoint.sys_id.toString());
+
+        request.setHttpMethod(endpoint.http_method);
+        request.setEndpoint(endpoint.endpoint);
+        request.setHttpTimeout(timeout || 6000);
+
+        switch (authenticationType) {
+            case "basic":
+                request.setBasicAuth(endpoint.user_name, endpoint.password.getDecryptedValue());
+                break;
+            default:
+                break;
+        }
+
+        request.setRequestBody(data);
+
+        var response = request.execute();
+        return response;
+    },
+
+    /** 
+     * Description : Set request header for the request
+     * @param {string} sc_endpoint
+     */
+    setRequestHeader: function (request, sc_endpoint) {
+        var gr = new GlideRecord(this.TABLE_NAME.SC_HEADER);
+        gr.addQuery("endpoint", sc_endpoint);
+        gr.addActiveQuery();
+        gr.query();
+        while (gr.next()) {
+            request.setRequestHeader(gr.getValue("name"), gr.getValue("value"));
+        }
+    },
+
+    type: 'ServiceConnectorOutboundHelper'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>QuanTH</sys_created_by>
+        <sys_created_on>2020-06-15 08:26:38</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>f0ad042bdb5d5c103e225a84dc96197c</sys_id>
+        <sys_mod_count>77</sys_mod_count>
+        <sys_name>ServiceConnectorOutboundHelper</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_script_include_f0ad042bdb5d5c103e225a84dc96197c</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2021-02-04 08:43:41</sys_updated_on>
+    </sys_script_include>
+</record_update>

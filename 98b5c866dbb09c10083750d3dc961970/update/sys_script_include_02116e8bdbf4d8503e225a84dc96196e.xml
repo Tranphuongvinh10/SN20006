@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_sccpl_serv_conn.ServiceConnectorModel</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>ServiceConnectorModel</name>
+        <script><![CDATA[var ServiceConnectorModel = Class.create();
+ServiceConnectorModel.prototype = {
+
+    initialize: function() {
+        this.LOG_LEVEL = gs.getProperty('x_sccpl_serv_conn.SConnector.LogLevel', '');
+    },
+
+    TABLE_NAME: {
+        // SERVICE CONNECTOR TABLES
+        CUSTOMER: "x_sccpl_serv_conn_identifying_customer_model",
+        PARTNER_MESSAGE: "x_sccpl_serv_conn_partner_message",
+        INBOUND_DEFINITION: "x_sccpl_serv_conn_inbound_definition",
+        OUTBOUND_DEFINITION: "x_sccpl_serv_conn_outbound_definition",
+        ATTRIBUTE_MAPPING: "x_sccpl_serv_conn_service_connector_attribute_mapping",
+        DATA_MAPPING: "x_sccpl_serv_conn_data_mappings",
+        TRANSFORM: "x_sccpl_serv_conn_service_connector_transform",
+        EXTERNAL_REFERENCES: 'x_sccpl_serv_conn_external_reference',
+        ERROR_HANDLE: "x_sccpl_serv_conn_identifying_error_handle",
+        OUTBOUND_TRIGGER: "x_sccpl_serv_conn_outbound_trigger",
+        SC_ENDPOINT: "x_sccpl_serv_conn_service_connector_endpoint",
+        SC_HEADER: "x_sccpl_serv_conn_service_connector_headers",
+        SC_ACTION: "x_sccpl_serv_conn_service_connector_action",
+        DEFINITION_PARTNER: "x_sccpl_serv_conn_definition_partner",
+        SC_PROPERTIES: "x_sccpl_serv_conn_service_connector_properties",
+
+        SC_CAT_ITEM: "sc_cat_item",
+        ITEM_OPTION_NEW: "item_option_new",
+
+        //SYSTEM TABLES
+        SYS_USER_GROUP: "sys_user_group",
+        COMPANY_TO_SERVICE: "u_company_to_service",
+        SYS_USER: "sys_user",
+        CMDB_CI: "cmdb_ci",
+        SYS_DB_OBJECT: "sys_db_object",
+        CMDB_CI_PROPOSED: "u_cmdb_ci_proposed_ci",
+        LOCATION: "cmn_location",
+        COUNTRY: "core_country",
+        INCIDENT: "incident",
+        ITASK: "u_incident_task",
+        REQUEST: "sc_request",
+        RITM: "sc_req_item",
+        SC_TASK: "sc_task",
+        ATTACHMENT: "sys_attachment",
+        PROBLEM: "problem",
+        CHANGE: "change_request",
+    },
+
+    EXECUTE_ACTION: {
+        INSERT: "insert",
+        UPDATE: "update",
+        DELETE: "delete"
+    },
+
+    MESSAGE_TYPE: {
+        XML: "xml",
+        JSON: "json"
+    },
+
+    TRANSFORM_ACTION: {
+        VALIDATION: "pre_validate",
+        BEFORE: "on_before",
+        AFTER: "on_after"
+    },
+
+    SC_ACTION: {
+        RESPONSE: "response",
+        ACKNOWLEDGEMENT: "acknowledgement",
+		ANATOMY_DATA: "anatomy_data"
+    },
+
+    WHEN_TO_RUN: {
+        INSERT: "insert",
+        UPDATE: "update",
+        ALWAYS: "always"
+    },
+
+    INTE_TYPE: "",
+    INTEGRATION_TYPE: {
+        INBOUND: "inbound",
+        OUTBOUND: "outbound",
+        BOTH: "both"
+    },
+
+    CUSTOMER: {
+        user: gs.getUserID(),
+        company: "",
+        scc_number: "",
+        customer_number: ""
+    },
+
+    TRIGGER: {
+        PARTNER: "",
+        TABLE: "",
+        ACTION: "",
+        TEMPLATE: "",
+        INBOUND_DEFINITION: "",
+        OUTBOUND_DEFINITION: "",
+        OUTBOUND_TRIGGER: ""
+    },
+
+    DATA: {},
+    PAYLOAD: "",
+
+    SUPPLY_VALUE: {
+        INSERT_UPDATE: "insert_and_update",
+        INSERT: "insert",
+        UPDATE: "update",
+        ALWAYS: "always"
+    },
+
+    MESSAGE_STATUS: {
+        INSERT: "inserted",
+        PENDING: "pending",
+        PROCESSED: "processed",
+        EXPIRED: "expired",
+        ERROR: "error"
+    },
+
+    scriptIO: { //script inputs and outputs
+        current: null,
+        message: null,
+        table: null,
+        action: null,
+        error_flag: false,
+        error_code: 200,
+        error_message: ""
+    },
+
+    partnerMessage: {},
+    partnerMessageNumber: "",
+
+    sccRecord: {},
+    previousRecord: {},
+
+    CI: null,
+
+    response: {
+        response_code: 0,
+        response_message: "",
+        // scc_number: "",
+        // customer_number: "",
+        /** e.g:
+        data: {
+            do what you want to return
+        } */
+    },
+
+    processError: false,
+
+    /**
+     * retry flag
+     */
+    RETRY: false,
+
+    /**
+     * log a message at follow level
+     * @param message
+     * @param source
+     */
+    log: function(message, source) {
+        this._logMessage(message, source, '');
+    },
+
+    /**
+     * log a message at ERROR level
+     * @param message
+     * @param source
+     */
+    logError: function(message, source) {
+        this._logMessage(message, source, 'ERROR');
+    },
+
+    /**
+     * log a message at the INFO level
+     * @param message
+     * @param source
+     */
+    logInfo: function(message, source) {
+        this._logMessage(message, source, 'INFO');
+    },
+    /**
+     * log a message at DEBUG level
+     * @param message
+     * @param source
+     */
+    logDebug: function(message, source) {
+        this._logMessage(message, source, 'DEBUG');
+    },
+    /**
+     * log a message at WARNING level
+     * @param message
+     * @param source
+     */
+    logWarning: function(message, source) {
+        this._logMessage(message, source, 'WARNING');
+    },
+
+    /**
+     * Internal method called for logging
+     * @param level
+     * @param message
+     * @param source
+     * @private
+     */
+    _logMessage: function(message, source, level) {
+        function _timeStamp() {
+            var gdt = new GlideDateTime();
+            var ms = (gdt.getNumericValue() % 1000) + '000';
+            return gdt.getTime().getByFormat('HH:mm:ss') + '.' + ms.substr(0, 3);
+        }
+
+        source = source || '';
+        level = this.LOG_LEVEL || level;
+        var log_message = 'SConnector [' + _timeStamp() + '] [' + level + '] (' + source + ') : ';
+
+        //var gl = new global.GSLog(level, source);
+
+        switch (level.toLowerCase()) {
+            case 'error':
+                //gl.logErr(log_message + message);
+                gs.error(log_message + message);
+                break;
+            case 'info':
+                //gl.logInfo(log_message + message);
+                gs.info(log_message + message);
+                break;
+            case 'debug':
+                //gl.logDebug(log_message + message);
+                gs.debug(log_message + message);
+                break;
+            case 'warning':
+                //gl.logWarning(log_message + message);
+                gs.warn(log_message + message);
+                break;
+            default:
+                break;
+        }
+    },
+
+    /**
+     * see if the incoming record has an external reference
+     * @param external_number
+     * @param tasktype
+     * @param external_party
+     * @returns {boolean}
+     */
+    hasExternalReference: function(external_number, tasktype, external_party) {
+        var gr = new GlideRecord(this.TABLE_NAME.EXTERNAL_REFERENCES);
+        gr.addQuery('u_external_number', external_number);
+        gr.addQuery('u_active', active);
+        gr.addQuery('u_external_party', external_party);
+        gr.query();
+        if (gr.next()) {
+            if (gr.scc_record_id.sys_class_name.toString() == tasktype) return true;
+        }
+        return false;
+    },
+
+    type: 'ServiceConnectorModel'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>VinhTr</sys_created_by>
+        <sys_created_on>2020-05-20 09:25:24</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>02116e8bdbf4d8503e225a84dc96196e</sys_id>
+        <sys_mod_count>80</sys_mod_count>
+        <sys_name>ServiceConnectorModel</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_script_include_02116e8bdbf4d8503e225a84dc96196e</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2020-12-16 08:33:35</sys_updated_on>
+    </sys_script_include>
+</record_update>

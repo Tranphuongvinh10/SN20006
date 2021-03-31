@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_sccpl_serv_conn.ServiceConnectorTransformHelper</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>Common functions used for transforming data.</description>
+        <name>ServiceConnectorTransformHelper</name>
+        <script><![CDATA[var ServiceConnectorTransformHelper = Class.create();
+ServiceConnectorTransformHelper.prototype = Object.extendsObject(ServiceConnectorModel, {
+
+    /** 
+	 * Description : Hanlde Service connector transform with event: pre-validate
+	 * @param {string} integrationType
+     * @param {object} data - [INBOUND] Original request
+	 * @param {object} trigger
+     * @returns {object} this.scriptIO
+	 */
+	preValidation: function (integrationType, data, trigger) {
+		this.scriptIO.message = data;
+		gs.info("[OUTBOUND] transformHelper preValidation scriptIO.message: {0}", JSON.stringify(this.scriptIO.message) );
+	
+		var gr = new GlideRecord(this.TABLE_NAME.TRANSFORM);
+		gr.addQuery("integration_type", integrationType);
+
+		if (integrationType == this.INTEGRATION_TYPE.INBOUND) {
+			gr.addQuery("inbound_definition", trigger.INBOUND_DEFINITION);
+		}
+		if (integrationType == this.INTEGRATION_TYPE.OUTBOUND) {
+			gr.addQuery("outbound_definition", trigger.OUTBOUND_DEFINITION);
+		}
+
+		gr.addQuery("event", this.TRANSFORM_ACTION.VALIDATION);
+		gr.addActiveQuery();
+		gr.orderBy("order");
+		gr.query();
+
+		while (gr.next()) {
+			var evaluator = new GlideScopedEvaluator();
+			evaluator.putVariable("message", this.scriptIO.message);
+			evaluator.putVariable("error_flag", false);
+			evaluator.putVariable("error_message", "");
+			evaluator.putVariable("trigger", trigger);
+
+			evaluator.evaluateScript(gr, "script", null);
+
+			// this.scriptIO.message = evaluator.getVariable("message");
+			this.scriptIO.error_flag = evaluator.getVariable("error_flag");
+			this.scriptIO.error_message = evaluator.getVariable("error_message");
+
+			if(this.scriptIO.error_flag) {
+				break;
+			}
+		}
+		return this.scriptIO;
+	},
+
+    /** 
+	 * Description : Hanlde Service connector transform with event: on-before
+     * @param {string} integrationType
+     * @param {object} data [INBOUND] this.DATA object after mapped - [OUTBOUND] SCC Record
+     * @param {object} trigger
+     * @returns {onject} this.scriptIO
+	 */
+	onBeforeValidation: function (integrationType, data, trigger, previous) {
+		this.scriptIO.message = data;
+		gs.info("[OUTBOUND] transformHelper onBefValidation scriptIO.message: {0}", JSON.stringify(this.scriptIO.message) );
+
+		var refData = {
+			sys_id: '',
+			is_exist: false
+		};
+
+		commonAction = new ServiceConnectorCommonAction();
+
+		var gr = new GlideRecord(this.TABLE_NAME.TRANSFORM);
+		gr.addQuery("integration_type", integrationType);
+
+		if (integrationType == this.INTEGRATION_TYPE.INBOUND) {
+			gr.addQuery("inbound_definition", trigger.INBOUND_DEFINITION);
+		}
+		if (integrationType == this.INTEGRATION_TYPE.OUTBOUND) {
+			gr.addQuery("outbound_definition", trigger.OUTBOUND_DEFINITION);
+		}
+
+		gr.addQuery("event", this.TRANSFORM_ACTION.BEFORE);
+		gr.addActiveQuery();
+		gr.orderBy("order");
+		gr.query();
+
+		while (gr.next()) {
+
+			//Handle to support reference table 			
+			if (gr.support_reference_data) {
+				switch (gr.action.toLowerCase()) {
+					case 'create_location':
+						refData = commonAction.isExistLocationByName(data);
+						if (!refData.is_exist) {
+							refData = commonAction.createLocation(data);
+						}
+						break;
+
+					case 'create_cmdb_ci':
+						refData = commonAction.isExistCMDBCI(data);
+						if (!refData.is_exist) {
+							refData = commonAction.createCMDBCI(data);
+						}
+						break;
+					default:
+						break;
+
+				}
+			}
+
+
+			var evaluator = new GlideScopedEvaluator();
+			evaluator.putVariable("message", this.scriptIO.message);
+			evaluator.putVariable("reference_data", refData);
+            evaluator.putVariable("trigger", trigger);
+            evaluator.putVariable("previous", previous);
+			evaluator.putVariable("error_flag", false);
+			evaluator.putVariable("error_message", "");
+
+			evaluator.evaluateScript(gr, "script", null);
+
+			this.scriptIO.message = evaluator.getVariable("message");
+			this.scriptIO.error_flag = evaluator.getVariable("error_flag");
+			this.scriptIO.error_message = evaluator.getVariable("error_message");
+
+			if(this.scriptIO.error_flag) {
+				break;
+			}
+		}
+
+		return this.scriptIO;
+	},
+
+	/** 
+	 * Description : Hanlde Service connector transform with event: on-after
+	 * @param {string} integrationType
+	 * @param {object} data INBOUND: SCC Record - OUTBOUND: this.DATA object after built
+	 * @param {object} trigger
+	 * @returns {onject} this.scriptIO
+	 */
+	onAfterValidation: function (integrationType, data, trigger) {
+		this.scriptIO.message = data;
+		gs.debug("[OUTBOUND] transformHelper onAftValidation scriptIO.message: {0}", JSON.stringify(this.scriptIO.message) );
+
+		var gr = new GlideRecord(this.TABLE_NAME.TRANSFORM);
+		gr.addQuery("integration_type", integrationType);
+
+		if (integrationType == this.INTEGRATION_TYPE.INBOUND) {
+			gr.addQuery("inbound_definition", trigger.INBOUND_DEFINITION);
+		}
+		if (integrationType == this.INTEGRATION_TYPE.OUTBOUND) {
+			gr.addQuery("outbound_definition", trigger.OUTBOUND_DEFINITION);
+		}
+
+		gr.addQuery("event", this.TRANSFORM_ACTION.AFTER);
+		gr.addActiveQuery();
+		gr.orderBy("order");
+		gr.query();
+
+		while (gr.next()) {
+			var evaluator = new GlideScopedEvaluator();
+			evaluator.putVariable("message", this.scriptIO.message);
+			evaluator.putVariable("error_flag", false);
+			evaluator.putVariable("error_message", "");
+
+			evaluator.evaluateScript(gr, "script", null);
+
+			this.scriptIO.message = evaluator.getVariable("message");
+			this.scriptIO.error_flag = evaluator.getVariable("error_flag");
+			this.scriptIO.error_message = evaluator.getVariable("error_message");
+
+			if(this.scriptIO.error_flag) {
+				break;
+			}
+		}
+		return this.scriptIO;
+	},
+
+	/** 
+	 * Description : Hanlde advance conditions in Inbound Definition and Outbound Trigger
+	 * @param {GlideRecord} triggerDefinition
+	 * @param {GlideRecord} data
+	 */
+	advanceScriptAction: function (triggerDefinition, data) {
+		this.scriptIO.current = triggerDefinition;
+		this.scriptIO.message = data;
+		
+		//gs.debug("[OUTBOUND] {0} transformHelper advScript scriptIO.message BEFORE: {1}", data.getValue("number"), JSON.stringify(this.scriptIO.message) );
+
+		var evaluator = new GlideScopedEvaluator();
+		for (k in this.scriptIO) {
+			evaluator.putVariable(k, this.scriptIO[k]);
+		}
+		evaluator.evaluateScript(triggerDefinition, "script", null);
+		for (k in this.scriptIO) {
+			this.scriptIO[k] = evaluator.getVariable(k);
+		}  
+		
+		
+		//Removing debugs
+		//gs.debug("[OUTBOUND] {0} transformHelper advScript scriptIO.message AFTER: {1}", data.getValue("number"), JSON.stringify(this.scriptIO.message) );
+		
+		return this.scriptIO;
+	},
+
+	type: 'ServiceConnectorTransformHelper'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>QuanTH</sys_created_by>
+        <sys_created_on>2020-06-15 12:36:32</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>98c685a3db559c103e225a84dc9619b4</sys_id>
+        <sys_mod_count>62</sys_mod_count>
+        <sys_name>ServiceConnectorTransformHelper</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_script_include_98c685a3db559c103e225a84dc9619b4</sys_update_name>
+        <sys_updated_by>PeterWile</sys_updated_by>
+        <sys_updated_on>2020-11-27 11:07:04</sys_updated_on>
+    </sys_script_include>
+</record_update>

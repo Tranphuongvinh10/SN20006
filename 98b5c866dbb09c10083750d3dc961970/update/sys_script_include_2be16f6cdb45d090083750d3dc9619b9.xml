@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_sccpl_serv_conn.ServiceConnectorIncidentClass</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>ServiceConnectorIncidentClass</name>
+        <script><![CDATA[var ServiceConnectorIncidentClass = Class.create();
+ServiceConnectorIncidentClass.prototype = Object.extendsObject(ServiceConnectorModel, {
+    initialize: function () { },
+
+    /** 
+     * Description : CI Lookup on device_name and company/ device_serial and company
+     * @param {string} company
+     * @param {string} device_name
+     * @param {string} device_serial
+     * @returns {string}
+     */
+    isExistConfigurationItem: function (company, device_name, device_serial) {
+        var ci = '';
+        var serial = '';
+        var name = '';
+        var queryString = '';
+        serial = device_serial;
+        name = device_name;
+
+
+        if (name != '' || serial != '') {
+            if (name != '' && serial != '') {
+                queryString = 'company=' + company + '^serial_number=' + serial + '^ORname=' + name;
+            } else if (name != '' && serial == '') {
+                queryString = 'company=' + company + '^name=' + name;
+            } else {
+                queryString = 'company=' + company + '^serial_number=' + serial;
+            }
+            var grCI = new GlideRecord('cmdb_ci');
+            grCI.addEncodedQuery(queryString);
+            grCI.query();
+            if (grCI.next()) {
+                ci = grCI.sys_id;
+            }
+        }
+        return ci;
+    },
+
+    /** 
+     * Description :  Lookup on param from Company to Service
+     * @param {string} company_id
+     * @param {string} organization_id
+     * @returns {object}
+     */
+    getDataFromMSP: function (company_id, organization_id, service) {
+
+        var msp = {
+            company: '',
+            parm_1: '',
+            parm_2: '',
+            parm_3: '',
+            parm_4: '',
+            parm_5: '',
+            parm_6: '',
+            is_exist: false
+        };
+        var queryString = '';
+        var organizationValue = '';
+        var serviceValue = '';
+
+        organizationValue = organization_id;
+        serviceValue = service;
+
+        if (organizationValue != '' || serviceValue != '') {
+            if (organizationValue != '' && serviceValue != '') {
+                queryString = 'u_company=' + company_id + '^ORu_parm_6=' + organization_id + '^u_service=' + service;
+            } else if (organizationValue != '' && serviceValue == '') {
+                queryString = 'u_company=' + company_id + '^u_parm_6=' + organizationValue;
+            } else {
+                queryString = 'u_company=' + company_id + '^u_service=' + serviceValue;
+            }
+
+
+            var grCom = new GlideRecord(this.TABLE_NAME.COMPANY_TO_SERVICE);
+            grCom.addEncodedQuery(queryString);
+            grCom.addQuery('u_active', 'true');
+            grCom.query();
+            if (grCom.next()) {
+                msp.company = grCom.u_company.sys_id + '';
+                msp.parm_1 = grCom.u_parm_1 + '';
+                msp.parm_2 = grCom.u_parm_2 + '';
+                msp.parm_3 = grCom.u_parm_3 + '';
+                msp.parm_4 = grCom.u_parm_4 + '';
+                msp.parm_5 = grCom.u_parm_5 + '';
+                msp.parm_6 = grCom.u_parm_6 + '';
+                msp.is_exist = true;
+            }
+        }
+        return msp;
+    },
+
+    /** 
+     * Description :  Lookup on param from Company to Service
+     * @param {string} company_id
+     * @param {string} organization_id
+     * @returns {object}
+     */
+    getDataFromIncident: function (number) {
+
+        var incident = {
+            company: '',
+            sys_id: '',
+            subcategory: '',
+            category: '',
+            impact: '',
+            urgency: '',
+            cmdb_ci: '',
+            is_exist: false
+        };
+
+        var grInc = new GlideRecord(this.TABLE_NAME.INCIDENT);
+        grInc.addQuery('number', number);
+        grInc.addQuery('active', 'true');
+        grInc.query();
+        if (grInc.next()) {
+            incident.company = grInc.company + '';
+            incident.sys_id = grInc.sys_id + '';
+            incident.category = grInc.category + '';
+            incident.subcategory = grInc.subcategory + '';
+            incident.impact = grInc.impact + '';
+            incident.urgency = grInc.urgency + '';
+            incident.cmdb_ci = grInc.cmdb_ci + '';
+            incident.is_exist = true;
+        }
+        return incident;
+    },
+
+
+    /** 
+     * Description : Create CI on device_name, company and class 'Proposed CI'.
+     * @param {string} company
+     * @param {string} device_name
+     * @returns {string}
+     */
+    createCIForMeraki: function (company, device_name, device_serial) {
+        var ci = '';
+        var grCIP = new GlideRecord(this.TABLE_NAME.CMDB_CI);
+        grCIP.sys_class_name = 'cmdb_ci_kvm_network';
+        grCIP.name = device_name;
+        grCIP.asset_tag = device_serial;
+        grCIP.serial_number = device_serial;
+        grCIP.company = company;
+        if (grCIP.insert()) {
+            ci = grCIP.sys_id;
+        }
+        return ci;
+    },
+
+    /** 
+     * Description : Lookup assignment group
+     * @param {string} assName 
+     * @return{string} assID
+     */
+    lookupAssignmentGroup: function (company, assName) {
+        var assID = '';
+        var grAss = new GlideRecord(this.TABLE_NAME.SYS_USER_GROUP);
+        grAss.addQuery("name", assName);
+        grAss.addQuery("company", company);
+        grAss.addQuery("active", true);
+        grAss.query();
+        if (grAss.next()) {
+            assID = grAss.sys_id + '';
+        }
+        if (this.LOG_LEVEL != '') {
+            this.logInfo('Lookup Assignment group from MSP: \n' + assID, 'lookupAssignmentGroup');
+        }
+        return assID;
+    },
+
+    /** 
+    * Description : Lookup assignment group from Data Mapping
+    * @param {string} assName 
+    * @return{string} assID
+    */
+    lookupAssignmentGroupFromDatamapping: function (definitionPartner, inteType, table, targetField, externalValue) {
+        var assName = '';
+        var grLookup = new GlideRecord(this.TABLE_NAME.DATA_MAPPING);
+        grLookup.addQuery("definition_partner", definitionPartner);
+        grLookup.addQuery("table_name", table);
+        var typeQuery = grLookup.addQuery("integration_type", inteType);
+        typeQuery.addOrCondition("integration_type", this.INTEGRATION_TYPE.BOTH);
+
+        grLookup.addQuery("scc_field_value", externalValue);
+        grLookup.addQuery("target_field", targetField);
+        grLookup.addActiveQuery();
+        grLookup.setLimit(1);
+        grLookup.query();
+
+        grLookup.query();
+        if (grLookup.next()) {
+            assName = grLookup.scc_field_value + '';
+        }
+        if (this.LOG_LEVEL != '') {
+            this.logInfo('Lookup Assignment group from Data Mapping: \n' + assName, 'lookupAssignmentGroupFromDatamapping');
+        }
+        return assName;
+    },
+
+
+    /** 
+     * Description :  Lookup on sys user
+     * @param {string} sysID
+     * @param {string} userID
+     * @returns {object}
+     */
+    lookupFromSysUser: function (sys_id, user_name, email) {
+
+        var queryString = '';
+        var user = {
+            first_name: '',
+            last_name: '',
+            email: '',
+            location: '',
+            phone: '',
+            mobile_phone: '',
+            department: '',
+            is_exist: false
+        };
+        var sysID = '';
+        var userName = '';
+        var userEmail = '';
+
+        sysID = sys_id;
+        userName = user_name;
+        userEmail = email;
+
+        if (sysID != '') {
+            queryString = 'sys_id=' + sysID;
+        } else if (userName != '') {
+            queryString = 'user_name=' + userName;
+        } else if (userEmail != '') {
+            queryString = 'email=' + userEmail;
+        }
+
+        var grUser = new GlideRecord(this.TABLE_NAME.SYS_USER);
+        grUser.addEncodedQuery(queryString);
+        grUser.addQuery('active', 'true');
+        grUser.query();
+        if (grUser.next()) {
+            user.first_name = grUser.first_name + '';
+            user.last_name = grUser.last_name + '';
+            user.email = grUser.email + '';
+            user.location = grUser.location + '';
+            user.phone = grUser.phone + '';
+            user.mobile_phone = grUser.mobile_phone + '';
+            user.department = grUser.department + '';
+            user.is_exist = true;
+
+        }
+        if (this.LOG_LEVEL != '') {
+            this.logInfo('Lookup user from Sys User: \n' + JSON.stringify(user), 'lookupFromSysUser');
+        }
+        return user;
+    },
+
+	/** 
+     * Description :  Lookup on location
+     * @param {string} sysID
+     * @param {string} userID
+     * @returns {object}
+     */
+    lookupLocation: function (company_id, location_name, site_code) {
+
+        var location = {
+            location_id: '',
+            location_name: '',
+            street: '',
+            city: '',
+            county: '',
+            poast_code: '',
+            country: '',
+            site_code: '',
+            is_exist: false
+        };
+        var locationName = '';
+        var companyID = '';
+        var siteCode = '';
+        var queryString = '';
+
+        locationName = location_name;
+        companyID = company_id;
+        siteCode = site_code;
+
+
+        if (locationName || siteCode) {
+            if (locationName) {
+                queryString = 'company=' + companyID + '^name=' + locationName;
+            } else if (siteCode) {
+                queryString = 'company=' + companyID + '^u_site_code=' + siteCode;
+            }
+
+            var grILoc = new GlideRecord(this.TABLE_NAME.LOCATION);
+            grILoc.addEncodedQuery(queryString);
+            grILoc.addQuery('u_state', 'Active');
+            grILoc.query();
+            if (grILoc.next()) {
+                location.location_id = grILoc.sys_id + '';
+                location.location_name = grILoc.name + '';
+                location.street = grILoc.street + '';
+                location.city = grILoc.city + '';
+                location.county = grILoc.state + '';
+                location.poast_code = grILoc.zip + '';
+                location.country = grILoc.u_country + '';
+                location.site_code = grILoc.u_site_code + '';
+                location.is_exist = true;
+            }
+
+        }
+
+        if (this.LOG_LEVEL != '') {
+            this.logInfo('Lookup location from Location: \n' + JSON.stringify(location), 'lookupLocation');
+        }
+        return location;
+    },
+
+    /**
+	* Insert an incident
+	* @param {object} data
+	* @param {sys_id} template
+	*/
+    insertIncident: function (data, template) {
+        try {
+            var k;
+            var gr = new GlideRecord(this.TABLE_NAME.INCIDENT);
+            gr.initialize();
+            if (template) {
+                var grTemplate = new GlideTemplate.get(template);
+                grTemplate.apply(gr);
+            }
+            for (k in data) {
+                gr[k] = data[k];
+            }
+            gr.contact_type = "Integration";
+            gr.insert();
+            return gr;
+        } catch (ex) {
+            // gs.info("Insert Incident Fail: ", ex);
+            this.logWarning('Insert incident error: \n' + ex, 'insertIncident');
+        }
+    },
+
+	/**
+    * Update an incident
+    * @param {string} sccRecordId
+	* @param {object} data
+	* @param {sys_id} template
+	*/
+    updateIncident: function (sccRecordId, data, template) {
+        try {
+            var defaultTemplate = gs.getProperty("x_sccpl_serv_conn.SConnector.incident.update.template") || "";
+            var gr = new GlideRecord(this.TABLE_NAME.INCIDENT);
+            gr.get(sccRecordId);
+            if (defaultTemplate) {
+                var grDefTemplate = new GlideTemplate.get(defaultTemplate);
+                grDefTemplate.apply(gr);
+            }
+            var k;
+            if (template) {
+                var grTemplate = new GlideTemplate.get(template);
+                grTemplate.apply(gr);
+            }
+            for (k in data) {
+                if(k != 'company') {
+                    gr[k] = data[k];
+                }
+            }
+            gr.update();
+            return gr;
+        } catch (ex) {
+            // gs.info("Update Incident Fail: ", ex);
+            this.logWarning('Update incident error: \n' + ex, 'updateIncident');
+        }
+    },
+
+	/**
+	* Insert an incident task
+	* @param {object} data
+	* @param {sys_id} template
+	*/
+    insertIncidentTask: function (data, template) {
+        try {
+            var k;
+            var gr = new GlideRecord(this.TABLE_NAME.ITASK);
+            gr.initialize();
+            if (template) {
+                var grTemplate = new GlideTemplate.get(template);
+                grTemplate.apply(gr);
+            }
+            for (k in data) {
+                gr[k] = data[k];
+            }
+            gr.contact_type = "Integration";
+            gr.insert();
+            return gr;
+        } catch (ex) {
+            //gs.info("Insert Incident Task Fail: ", ex);
+            this.logWarning('Insert incident task error: \n' + ex, 'insertIncidentTask');
+        }
+    },
+
+    /**
+    * Update an incident task
+    * @param {string} sccRecordId
+	* @param {object} data
+	* @param {sys_id} template
+	*/
+    updateIncidentTask: function (sccRecordId, data, template) {
+        try {
+            var gr = new GlideRecord(this.TABLE_NAME.ITASK);
+            gr.get(sccRecordId);
+            var k;
+            if (template) {
+                var grTemplate = new GlideTemplate.get(template);
+                grTemplate.apply(gr);
+            }
+            for (k in data) {
+                if(k != 'company') {
+                    gr[k] = data[k];
+                }
+            }
+            gr.update();
+            return gr;
+        } catch (ex) {
+            //gs.info("Update Incident Task Fail: ", ex);
+            this.logWarning('Update incident task error: \n' + ex, 'updateIncidentTask');
+        }
+    },
+
+    type: 'ServiceConnectorIncidentClass'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>VinhTr</sys_created_by>
+        <sys_created_on>2020-05-25 05:57:04</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>2be16f6cdb45d090083750d3dc9619b9</sys_id>
+        <sys_mod_count>68</sys_mod_count>
+        <sys_name>ServiceConnectorIncidentClass</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_script_include_2be16f6cdb45d090083750d3dc9619b9</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2020-10-26 09:33:40</sys_updated_on>
+    </sys_script_include>
+</record_update>

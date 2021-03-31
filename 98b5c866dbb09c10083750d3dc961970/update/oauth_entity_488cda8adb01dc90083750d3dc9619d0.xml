@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="oauth_entity">
+    <oauth_entity action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <access_token_lifespan>1800</access_token_lifespan>
+        <active>true</active>
+        <auth_code_lifespan>60</auth_code_lifespan>
+        <auth_url/>
+        <certificate_url/>
+        <client_id>088cda8a8d01dc90d817d5a0e140e7d0</client_id>
+        <client_secret>jqW62BRQrvuteHQBYIYtcw==</client_secret>
+        <client_uuid>c48cda8adb01dc90083750d3dc9619d0</client_uuid>
+        <code_challenge_method>S256</code_challenge_method>
+        <comments>API key and shared secret for Meraki integration</comments>
+        <default_grant_type>password</default_grant_type>
+        <id_token_lifespan>86400</id_token_lifespan>
+        <logo_url/>
+        <message_signature_lifespan>60</message_signature_lifespan>
+        <name>Meraki</name>
+        <oauth_api_script/>
+        <protocol_name/>
+        <public_client>false</public_client>
+        <redirect_url/>
+        <refresh_token_lifespan>8640000</refresh_token_lifespan>
+        <refresh_token_url/>
+        <revoke_token_url/>
+        <salt/>
+        <send_client_credentials_as>request_body_parameter</send_client_credentials_as>
+        <skip_authorize>false</skip_authorize>
+        <sys_class_name>oauth_entity</sys_class_name>
+        <sys_created_by>AnthonyFl</sys_created_by>
+        <sys_created_on>2020-05-29 16:44:29</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>488cda8adb01dc90083750d3dc9619d0</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Meraki</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>oauth_entity_488cda8adb01dc90083750d3dc9619d0</sys_update_name>
+        <sys_updated_by>AnthonyFl</sys_updated_by>
+        <sys_updated_on>2020-05-29 16:44:29</sys_updated_on>
+        <token_url/>
+        <type>client</type>
+        <use_mutual_auth>false</use_mutual_auth>
+        <user/>
+    </oauth_entity>
+</record_update>

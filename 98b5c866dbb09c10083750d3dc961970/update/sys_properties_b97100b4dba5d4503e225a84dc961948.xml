@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>Default Assignment Group Id for Request&#13;
+Group name: 2nd Line</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_sccpl_serv_conn.SConnector.default_assignment_group_id</name>
+        <read_roles/>
+        <suffix>SConnector.default_assignment_group_id</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>QuanTH</sys_created_by>
+        <sys_created_on>2020-06-19 04:47:06</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>b97100b4dba5d4503e225a84dc961948</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>x_sccpl_serv_conn.SConnector.default_assignment_group_id</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_properties_b97100b4dba5d4503e225a84dc961948</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2020-07-03 04:41:53</sys_updated_on>
+        <type>string</type>
+        <value>0bfc316c37273d005a2ef01643990ead</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=b97100b4dba5d4503e225a84dc961948"/>
+</record_update>

@@ -1,0 +1,815 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_sccpl_serv_conn.ServiceConnectorBase</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>ServiceConnectorBase</name>
+        <script><![CDATA[var ServiceConnectorBase = Class.create();
+ServiceConnectorBase.prototype = Object.extendsObject(ServiceConnectorModel, {
+	initialize: function () {
+		this.LOG_LEVEL = gs.getProperty('x_sccpl_serv_conn.SConnector.LogLevel', '');
+
+		this.commonAction = new ServiceConnectorCommonAction();
+		this.custom_flag = false;
+		this.customAction = new ServiceConnectorCustomAction();
+
+		this.transformHelper = new ServiceConnectorTransformHelper();
+		this.actionHelper = new ServiceConnectorActionHelper();
+		this.responseHandler = new ServiceConnectorResponseHandler();
+
+		this.inboundHelper = new ServiceConnectorInboundHelper();
+		this.outboundHelper = new ServiceConnectorOutboundHelper();
+	},
+
+	/**  ====================================*/
+	/**      INBOUND PROCESS */
+	/**===================================== */
+
+    /**
+     * Execute Inbound process
+     * @param {object} payload
+     * @returns {boolean}
+     */
+	processRequest: function (payload) {
+		this.INTE_TYPE = this.INTEGRATION_TYPE.INBOUND;
+
+		//Tracking customer's message into SCC SN
+		this.partnerMessageNumber = this.createPartnerMessage(payload);
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('Message Number: ' + this.partnerMessageNumber, 'processRequest');
+		}
+		if (!this.partnerMessageNumber) {
+			return;
+		}
+
+		//Parse payload string to an object
+		var data = JSON.parse(payload);
+
+		//Check condition in Inbound definition
+		var validMessage = this._isValidMessage(data);
+		gs.info("[INBOUND] this.TRIGGER\n" + JSON.stringify(this.TRIGGER));
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('Message is Valid: ' + validMessage, 'processRequest');
+		}
+		if (!validMessage) {
+			this.response = this._responseLookup("invalid_request");
+			this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+			this.processError = true;
+			return;
+		}
+
+		//Handle Service Connector transform with event: pre-validate
+		this.scriptIO = this.transformHelper.preValidation(this.INTE_TYPE, data, this.TRIGGER);
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('Pre-validation completed: ' + this.scriptIO.error_flag, 'processRequest');
+		}
+		if (this.scriptIO.error_flag) {
+			this.response = this._responseLookup("prevalidate_error", this.scriptIO.error_message);
+			this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+			this.processError = true;
+			return;
+		}
+		var actionValidate = this.inboundHelper.actionValidation(this.TRIGGER, this.CUSTOMER);
+		if (actionValidate.processError) {
+			this.response = actionValidate.response;
+			this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+			this.processError = true;
+			return;
+		}
+
+		//Handle mapping all fields in attribute mapping
+		var mapResult = this.inboundHelper.mapMessage(data, this.TRIGGER);
+		this.processError = mapResult.processError;
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('Request is mapped successfully: ' + this.processError, 'processRequest');
+		}
+		if (this.processError) {
+			this.response = this._responseLookup("mapping_data_error");
+			this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+			return;
+		}
+		this.DATA = mapResult.data;
+		gs.debug("[INBOUND] this.DATA\n" + JSON.stringify(this.DATA));
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.logInfo('Data after mapping:\n' + JSON.stringify(this.DATA), 'processRequest');
+		}
+
+		//Handle Service Connector transform with event: on-before
+		this.scriptIO = this.transformHelper.onBeforeValidation(this.INTE_TYPE, this.DATA, this.TRIGGER);
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('On-before validation completed: ' + this.scriptIO.error_flag, 'processRequest');
+		}
+		if (this.scriptIO.error_flag) {
+			this.response = this._responseLookup("on_before_error", this.scriptIO.error_message);
+			this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+			this.processError = true;
+			return;
+		}
+		this.DATA = this.scriptIO.message;
+
+		//Handle process integration: create/update/.....
+		var triggerObject = this.TRIGGER;
+
+		var result = this.inboundHelper.executeRequest(this.CUSTOMER, triggerObject, this.DATA);
+		this.processError = result.processError;
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('Execute request successfully: ' + this.processError, 'processRequest');
+		}
+		if (this.processError) {
+			this.response = result.response;
+			this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+			return;
+		}
+		this.response = result.response;
+		this.sccRecord = result.sccRecord;
+		this.previousRecord = this.inboundHelper.previousRecord || null;
+
+		//Handle Service Connector transform with event: on-after
+		this.scriptIO = this.transformHelper.onAfterValidation(this.INTE_TYPE, this.sccRecord, this.TRIGGER);
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('On-after validation completed: ' + this.scriptIO.error_flag, 'processRequest');
+		}
+		if (this.scriptIO.error_flag) {
+			this.response = this._responseLookup("on_after_error", this.scriptIO.error_message);
+			this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+			this.processError = true;
+			//this._rollBack();
+			return;
+		}
+		this.sccRecord = this.scriptIO.message;
+		this.DATA = this.scriptIO.message;
+
+		//Handle create ebonding between customer and SCC
+		var externalReference = this._createExternalReference();
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('External Reference Id: ' + externalReference, 'processRequest');
+		}
+		if (!externalReference) {
+			this.response = this._responseLookup("external_reference_create_fail");
+			this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+			this.processError = true;
+			return;
+		}
+	},
+
+	/**=====================================*/
+	/**      OUTBOUND PROCESS */
+	/**===================================== */
+
+    /** 
+     * Description : outbound process
+     * @param {object} data
+     */
+	outboundProcess: function (data, previous_data) {
+		try {
+			this.PREVIOUS_DATA = null;
+			this.INTE_TYPE = this.INTEGRATION_TYPE.OUTBOUND;
+			this.PREVIOUS_DATA = previous_data;
+			gs.debug("[OUTBOUND] {0} and the operation is: {1}", data.getValue("number"), data.operation());
+			gs.debug("[OUTBOUND] data object: {0}", data.getValue("number"));
+			gs.debug("[OUTBOUND] integration type: {0} with trigger {1}", this.INTE_TYPE, JSON.stringify(this.TRIGGER));
+			
+			var isMatchTrigger = this._matchTrigger(data);
+			if (!isMatchTrigger) {
+				return;
+			}
+			gs.debug("[OUTBOUND] {0}: We have a match on the trigger {1}", data.getValue("number"), JSON.stringify(this.TRIGGER));
+			this.partnerMessageNumber = this._createPartnerMessageJSON("", this.INTE_TYPE);
+			//Log message follow level
+			if (this.LOG_LEVEL != '') {
+				this.log('Message Number: ' + this.partnerMessageNumber, 'outboundProcess');
+			}
+			if (!this.partnerMessageNumber) {
+				return;
+			}
+
+			//Handle Service Connector transform with event: on-before
+			this.scriptIO = this.transformHelper.onBeforeValidation(this.INTE_TYPE, this.sccRecord, this.TRIGGER, this.PREVIOUS_DATA);
+
+			//Log message follow level
+			if (this.LOG_LEVEL != '') {
+				this.log('On-before validation completed: ' + this.scriptIO.error_flag, 'outboundProcess');
+			}
+			if (this.scriptIO.error_flag) {
+				this.response = this._responseLookup("on_before_error", this.scriptIO.error_message);
+				this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+				return;
+			}
+			this.DATA = this.scriptIO.message;
+
+			this.DATA = this.outboundHelper.buildMessage(this.DATA, this.PREVIOUS_DATA, this.TRIGGER);
+			gs.debug("[OUTBOUND] {0} with TRIGGER details {1}", data.getValue("number"), JSON.stringify(this.TRIGGER));
+
+			if (this.LOG_LEVEL != '') {
+				this.log('Build message completed: ' + this.processError, 'outboundProcess');
+			}
+			if (this.processError) {
+				this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+				return;
+			}
+			gs.debug("[OUTBOUND] integration type: {0} with trigger {1}", this.INTE_TYPE, JSON.stringify(this.TRIGGER));
+			//Handle Service Connector transform with event: on-after
+			this.scriptIO = this.transformHelper.onAfterValidation(this.INTE_TYPE, this.DATA, this.TRIGGER);
+
+			//Log message follow level
+			if (this.LOG_LEVEL != '') {
+				this.log('On-after validation completed: ' + this.scriptIO.error_flag, 'outboundProcess');
+			}
+			if (this.scriptIO.error_flag) {
+				this.response = this._responseLookup("on_after_error", this.scriptIO.error_message);
+				this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+				return;
+			}
+
+			this.DATA = this.scriptIO.message;
+
+			this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.PENDING, 102);
+
+		} catch (err) {
+			//Log message follow level	
+			if (this.LOG_LEVEL != '') {
+				this.log(' Outbound process has been error: ' + err, 'outboundProcess');
+			}
+		}
+	},
+
+    /** 
+     * Description : send integration request
+     * @param {GlideRecord} data
+     */
+	sendOutboundRequest: function (data) {
+		this.INTE_TYPE = this.INTEGRATION_TYPE.OUTBOUND;
+		this.partnerMessage = data;
+		
+		var msg = data.getValue("message");
+		try {
+			this.DATA = JSON.parse(msg);
+		} catch (error) {
+			this.DATA = data.message;
+		}
+
+		this.TRIGGER = this.commonAction.triggerRebuild(this.partnerMessage);
+		gs.info("[OUTBOUND] this.TRIGGER\n" + JSON.stringify(this.TRIGGER));
+
+		if (!this.actionHelper.anatomyData(data)) {
+			this.response = this._responseLookup("anatomy_data_fail");
+			this.updatePartnerMessage(data, this.MESSAGE_STATUS.INSERT, 501);
+			return;
+		}
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('Re-build the TRIGGER object: ' + JSON.stringify(this.TRIGGER), 'sendOutboundRequest');
+		}
+
+		var endpoint = this.commonAction.endpointLookup(this.TRIGGER);
+		if (!endpoint || !endpoint.endpoint) {
+			this.response = this._responseLookup("endpoint_not_found");
+			this.updatePartnerMessage(data, this.MESSAGE_STATUS.ERROR, 500);
+			return;
+		}
+
+		this.PAYLOAD = !this.RETRY ? this._rebuildData(this.DATA, endpoint) : JSON.stringify(this.DATA);
+		gs.info("[OUTBOUND] this.PAYLOAD\n" + this.PAYLOAD);
+
+		var result = this.outboundHelper.sendIntegrationMessage(endpoint, this.PAYLOAD);
+		var statusCode = result.getStatusCode();
+
+		//STRY0031275: Service Connector - Error Handling
+		if (statusCode != 200 && statusCode != 201) {
+			if(result.getBody()) {
+				try {
+					this.response = JSON.parse(result.getBody());
+				} catch (e) {
+					this.response = result.getBody();
+				}
+			} else {
+				this.response = this._responseLookup("request_execute_fail");
+			}
+			this.updatePartnerMessage(data, this.MESSAGE_STATUS.ERROR, statusCode);
+			return;
+		}
+		if (result.getBody()) {
+			try {
+				this.response = JSON.parse(result.getBody());
+				this.response = this._responseHandling(null, this.response);
+			} catch (e) {
+				this.response = result.getBody();
+				this.response = this._responseHandling(null, this.response);
+			}
+		}
+
+		//Handle create ebonding between customer and SCC
+		var externalReference = this._createExternalReference();
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('External Reference Id: ' + externalReference, 'sendOutboundRequest');
+		}
+		if (!externalReference) {
+			this.response = this._responseLookup("external_reference_create_fail");
+			this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+			return;
+		}
+
+		//Handle update state for Partner Message
+		this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.PROCESSED, statusCode);
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('OUTBOUND INTEGRATION PROCESS COMPLETED', 'sendOutboundRequest');
+		}
+	},
+
+    /** 
+     * Description : Re-create payload.
+     * @param {GlideRecord} data
+     * @returns {string} partner message number
+     */
+	recreatePayload: function (data) {
+		this.INTE_TYPE = this.INTEGRATION_TYPE.OUTBOUND;
+		this.partnerMessage = data;
+
+		this.TRIGGER = this.commonAction.triggerRebuild(this.partnerMessage);
+		gs.info("[OUTBOUND] this.TRIGGER\n" + JSON.stringify(this.TRIGGER));
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('Re-build the TRIGGER object: ' + JSON.stringify(this.TRIGGER), 'recreatePayload');
+		}
+
+		this.sccRecord = this.commonAction.recordLookupById(data.table, data.getValue("scc_number"));
+		if (!this.sccRecord) {
+			this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+			return;
+		}
+
+		//When retry is running, previous == current (record)
+		this.PREVIOUS_DATA = this.sccRecord;
+
+		//Handle Service Connector transform with event: on-before
+		this.scriptIO = this.transformHelper.onBeforeValidation(this.INTE_TYPE, this.sccRecord, this.TRIGGER, this.PREVIOUS_DATA);
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('On-before validation completed: ' + this.scriptIO.error_flag, 'recreatePayload');
+		}
+		if (this.scriptIO.error_flag) {
+			this.response = this._responseLookup("on_before_error", this.scriptIO.error_message);
+			this.updatePartnerMessage(data, this.MESSAGE_STATUS.ERROR, 500);
+			return;
+		}
+		this.DATA = this.scriptIO.message;
+
+		this.DATA = this.outboundHelper.buildMessage(this.DATA, this.PREVIOUS_DATA, this.TRIGGER);
+		gs.info("[OUTBOUND] this.DATA\n" + JSON.stringify(this.DATA));
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('Build message completed: ' + this.processError, 'recreatePayload');
+		}
+		if (this.processError) {
+			this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.ERROR, 500);
+			return;
+		}
+
+		//Handle Service Connector transform with event: on-after
+		this.scriptIO = this.transformHelper.onAfterValidation(this.INTE_TYPE, this.DATA, this.TRIGGER);
+
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.log('On-after validation completed: ' + this.scriptIO.error_flag, 'recreatePayload');
+		}
+		if (this.scriptIO.error_flag) {
+			this.response = this._responseLookup("on_after_error", this.scriptIO.error_message);
+			this.updatePartnerMessage(data, this.MESSAGE_STATUS.ERROR, 500);
+			return;
+		}
+		this.DATA = this.scriptIO.message;
+
+		this.updatePartnerMessage(this.partnerMessage, this.MESSAGE_STATUS.PENDING, 102);
+	},
+
+	/**=====================================*/
+	/**      IMPLEMENT FUNCTIONS ON PARTNER MESSAGE */
+	/**===================================== */
+
+    /** 
+     * Description : Create a partner message.
+     * @param {string} data
+     * @returns {string} partner message number
+     */
+	createPartnerMessage: function (data) {
+		var result = "";
+		var messageType = this.commonAction.getMessageType(data.slice(0, 1));
+
+		switch (messageType) {
+			case this.MESSAGE_TYPE.XML:
+				result = this._createPartnerMessageXML(data, this.INTE_TYPE);
+				break;
+			case this.MESSAGE_TYPE.JSON:
+				result = this._createPartnerMessageJSON(data, this.INTE_TYPE);
+				break;
+			default:
+				this.response = this._responseLookup("error_request_type");
+				break;
+		}
+		return result;
+	},
+
+    /** 
+     * Description : Update Partner message
+     * @param {object} data
+     * @param {string} status
+     * @param {integer} statusCode
+     */
+	updatePartnerMessage: function (data, status, statusCode) {
+		
+		if (!data.getValue("message")) {
+			data.setValue("message", typeof (this.DATA) == "object" ? JSON.stringify(this.DATA) : this.DATA);
+		}
+		if (this.PAYLOAD) {
+			data.setValue("message", this.PAYLOAD);
+		}
+		data.setValue("definition_partner", this.TRIGGER.PARTNER || "");
+		data.setValue("inbound_definition", this.TRIGGER.INBOUND_DEFINITION || "");
+		data.setValue("outbound_definition", this.TRIGGER.OUTBOUND_DEFINITION || "");
+		data.setValue("outbound_trigger", this.TRIGGER.OUTBOUND_TRIGGER || "");
+		data.setValue("http_status", statusCode || 500);
+		data.setValue("table", this.TRIGGER.TABLE || "");
+		if (!data.getValue("scc_number")) {
+			data.setValue("scc_number", this.sccRecord.sys_id || this.response.scc_number || this.partnerMessage.scc_number || "");
+		}
+		//gs.debug("[OUTBOUND] {0} updatePartnerMessage with scc number as: {1}", data.getValue("number"), data.getValue("scc_number") );
+		
+		data.setValue("external_number", this.CUSTOMER.customer_number || this.response.customer_number || "");
+		data.setValue("message_type", this.TRIGGER.ACTION || "unknown");
+		data.setValue("message_status", status || this.MESSAGE_STATUS.ERROR);
+		data.setValue("response", JSON.stringify(this.response) || "");
+		data.setValue("company", gs.getUser().getCompanyID() || "");
+		data.update();
+		//Log message follow level
+		if (this.LOG_LEVEL != '') {
+			this.logInfo('Partner message updated: ' + data.number + ' with state ' + data.getValue("message_status"), 'updatePartnerMessage');
+		}
+	},
+
+	/**  ====================================*/
+	/**      ADVANCE FUNCTIONS */
+	/**===================================== */
+
+    /** 
+     * Description : Check condition in Inbound definition message
+     * Check match user's profile
+     * Check condition in advanced action
+     * @param {string} data
+     * @returns {bool} 
+     */
+	_isValidMessage: function (data) {
+		var isExist = false;
+		var inbDef = new GlideRecord(this.TABLE_NAME.INBOUND_DEFINITION);
+		inbDef.addQuery("active", true);
+		inbDef.orderBy("order");
+		inbDef.query();
+		while (inbDef.next()) {
+			var conditions = this.commonAction.scriptCondition(inbDef, 'condition', data);
+			isExist = this._conditionTracking(conditions, inbDef.match_user_name, inbDef.user_name);
+
+			if (isExist == true) {
+				this.TRIGGER.PARTNER = inbDef.getValue("definition_partner");
+				this.TRIGGER.INBOUND_DEFINITION = inbDef.getValue("sys_id");
+				this.TRIGGER.TEMPLATE = inbDef.getValue("template");
+
+				if (inbDef.advanced_action) {
+					this.scriptIO = this.transformHelper.advanceScriptAction(inbDef, data);
+					if (this.LOG_LEVEL != '') {
+						this.logInfo('Check error flag in conditions advanced: ' + this.scriptIO.error_flag, 'isValidMessage');
+					}
+					if (this.scriptIO.error_flag) {
+						return isExist = false;
+					}
+					if (this.scriptIO.message) {
+						data = this.scriptIO.message;
+					}
+				}
+
+				//Building Customer's object model (eg: profile, company, SIC,...)
+				this.CUSTOMER = this.commonAction.mappingCustomerData(data, inbDef.key_field);
+				gs.info("[INBOUND] this.CUSTOMER\n" + JSON.stringify(this.CUSTOMER));
+
+				this.TRIGGER.TABLE = this.scriptIO.table || inbDef.getValue("table");
+				this.TRIGGER.ACTION = this.scriptIO.action || this.commonAction.identifyAction(this.CUSTOMER);
+
+				break;
+			}
+		}
+
+		return isExist;
+	},
+
+    /** 
+     * Description : Check the conditions OR scripts for OUTBOUND
+     * @param {object} data
+     * @returns {bool}
+     */
+	_matchTrigger: function (data, action) {
+		var answer = false;
+		var conditionCheck = false;
+		var scriptCheck = true;
+
+		this.scriptIO = {};		
+
+		this.TRIGGER.TABLE = data.sys_class_name;
+		this.TRIGGER.ACTION = data.operation();
+		gs.info("[OUTBOUND] {0} data object with Table and Action: {1} and {2}", data.getValue("number")|| data.table_sys_id, this.TRIGGER.TABLE, this.TRIGGER.ACTION);
+
+		if (!this.TRIGGER.TABLE) {
+			return answer;
+		}
+
+		// Special case for sys_attachment
+		if (this.TRIGGER.TABLE == this.TABLE_NAME.ATTACHMENT) {
+			this.TRIGGER.ACTION = this.EXECUTE_ACTION.UPDATE;
+		}
+		gs.debug("[OUTBOUND] {0} double checking object with Table and Action: {1} and {2}", data.getValue("number")|| data.table_sys_id, this.TRIGGER.TABLE, this.TRIGGER.ACTION);
+
+		var trigger = new GlideRecord(this.TABLE_NAME.OUTBOUND_TRIGGER);
+		trigger.addQuery("table", this.TRIGGER.TABLE);
+
+		var timeQuery = trigger.addQuery("when_to_run", this.TRIGGER.ACTION);
+		timeQuery.addOrCondition("when_to_run", this.WHEN_TO_RUN.ALWAYS);
+
+		trigger.addActiveQuery();
+		trigger.orderBy("order");
+		trigger.query();
+		gs.debug("[OUTBOUND] {0} data object has found {1} triggers", data.getValue("number")|| data.table_sys_id, trigger.getRowCount() );
+		
+		while (trigger.next()) {
+			gs.info("[OUTBOUND] {0} Check outbound_condition string {1}", data.getValue("number")|| data.table_sys_id, trigger.outbound_conditions);
+			
+			conditionCheck = GlideFilter.checkRecord(data, trigger.outbound_conditions, true);
+			if (trigger.advance) {
+				
+				this.scriptIO = this.transformHelper.advanceScriptAction(trigger, data);
+				
+				gs.info("[OUTBOUND] {0} Check error flag in conditions advanced {1}", data.getValue("number")|| data.table_sys_id, this.scriptIO.error_flag);
+				if (this.scriptIO.error_flag) {
+					scriptCheck = false;
+				} else {
+					scriptCheck = true;
+				}
+				this.TRIGGER.TABLE = this.scriptIO.table || this.TRIGGER.TABLE;
+				this.TRIGGER.ACTION = this.scriptIO.action || this.TRIGGER.ACTION;
+				gs.debug("[OUTBOUND] {0} triple checking object with Table and Action: {1} and {2}", data.getValue("number")|| data.table_sys_id, this.TRIGGER.TABLE, this.TRIGGER.ACTION);
+			}
+			if (conditionCheck && scriptCheck) {
+				answer = true;
+		
+				gs.debug("[OUTBOUND] {0} Check outbound_condition string in case of TRUE", data.getValue("number")|| data.table_sys_id, trigger.outbound_conditions);
+				this.TRIGGER.OUTBOUND_DEFINITION = trigger.outbound_definition;
+				this.TRIGGER.OUTBOUND_TRIGGER = trigger.sys_id.toString();
+				this.TRIGGER.PARTNER = trigger.outbound_definition.definition_partner;
+
+				gs.debug("[OUTBOUND] {0} and scriptIO.message {1}", data.getValue("number")|| data.table_sys_id, JSON.stringify(this.scriptIO.message) );
+				this.sccRecord = this.scriptIO.message || data;
+				break;
+			}
+		}		
+		
+		if (answer) {
+			var isExist = false;
+			if (this.TRIGGER.TABLE == this.TABLE_NAME.ATTACHMENT) {
+				var targetId = this.sccRecord.getValue("table_sys_id");
+
+				isExist = this.commonAction.insertSuccessMessage(targetId);
+				if (!isExist) {
+					answer = false;
+				}
+			} else {
+				if (this.TRIGGER.ACTION != this.EXECUTE_ACTION.INSERT) {
+
+					isExist = this.commonAction.insertSuccessMessage(this.sccRecord.getValue("sys_id"));
+					if (!isExist) {
+						this.TRIGGER.ACTION = this.EXECUTE_ACTION.INSERT;
+					}
+				}
+			}
+		}else {
+			gs.debug("[OUTBOUND] {0} No trigger attachment found", data.getValue("number")|| data.table_sys_id, JSON.stringify(this.scriptIO.message) );
+		}
+
+		return answer;
+	},
+
+    /** 
+     * Description : Update Partner message
+     * @param {string} currentIP
+     * @param {object} listIPs
+     * @param {bool} 
+     */
+	validateIPAdress: function (currentIP, listIPs) {
+		var flag = false;
+		if (listIPs.includes(currentIP)) {
+			flag = true;
+		}
+		return flag;
+	},
+
+	/**  ====================================*/
+	/**      PRIVATE FUNCTIONS */
+	/**===================================== */
+
+    /** 
+     * Description : Create external reference between customer and SCC
+     * @return {string} sys_id
+     */
+	_createExternalReference: function () {
+		var gr = new GlideRecord(this.TABLE_NAME.EXTERNAL_REFERENCES);
+		gr.initialize();
+		gr.setValue("active", true);
+		gr.setValue("integration_type", this.INTE_TYPE);
+		gr.setValue("table", this.TRIGGER.TABLE);
+		gr.setValue("external_party", this.partnerMessage.sys_id);
+		gr.setValue("scc_record_id", this.sccRecord.sys_id || this.partnerMessage.scc_number || "");
+		gr.setValue("external_record_id", this.CUSTOMER.customer_number || this.response.customer_number || "");
+		gr.setValue("external_name", this.commonAction.definitionParterNameLookup(this.TRIGGER.PARTNER));
+		return gr.insert() || "";
+	},
+
+    /** 
+     * Description : Insert Partner message by JSON format
+     * @param {string} data
+     * @param {string} integrationType
+     * @returns {string} partner message number
+     */
+	_createPartnerMessageJSON: function (data, integrationType) {
+		
+		gs.debug("[OUTBOUND]  _createPartnerMessageJSON with sysID: {1}", this.sccRecord.sys_id );
+		
+		var result = "";
+		var gr = new GlideRecord(this.TABLE_NAME.PARTNER_MESSAGE);
+		gr.initialize();
+		gr.setValue("message_status", "inserted");
+		gr.setValue("message", data);
+		gr.setValue("integration_type", integrationType);
+		gr.setValue("definition_partner", this.TRIGGER.PARTNER || "");
+		if (integrationType == this.INTEGRATION_TYPE.INBOUND) {
+			gr.setValue("inbound_definition", this.TRIGGER.INBOUND_DEFINITION || "");
+		}
+		if (integrationType == this.INTEGRATION_TYPE.OUTBOUND) {
+			gr.setValue("outbound_definition", this.TRIGGER.OUTBOUND_DEFINITION || "");
+			gr.setValue("outbound_trigger", this.TRIGGER.OUTBOUND_TRIGGER || "");
+		}
+		gr.setValue("table", this.TRIGGER.TABLE || "");
+		gr.setValue("scc_number", this.sccRecord.sys_id ? String(this.sccRecord.sys_id) : "");
+		gr.setValue("external_number", this.CUSTOMER.customer_number || "");
+		gr.setValue("message_type", this.TRIGGER.ACTION || "");
+		if (gr.insert()) {
+			this.partnerMessage = gr;
+			result = gr.number.getDisplayValue();
+			if (this.LOG_LEVEL != '') {
+				this.logInfo('Partner message created: ' + result + ' with state inserted', '_createPartnerMessageJSON');
+			}
+		}
+		return result;
+	},
+
+    /** 
+     * Description : Insert Partner message by XML format
+     * @param {string} data
+     * @param {string} integrationType
+     * @returns {string} partner message number
+     */
+	_createPartnerMessageXML: function (data, integrationType) {
+		//TODO:
+	},
+
+    /** 
+     * Description : Hanlde check condition/user's profile
+     * @param {bool} conditions
+     * @param {bool} matchUser
+     * @param {string} user
+     * @returns {bool} 
+     */
+	_conditionTracking: function (conditions, matchUser, user) {
+		var checkConditions = false,
+			checkUser = false;
+		var result = false;
+
+		if (conditions) {
+			checkConditions = true;
+		}
+		if (matchUser) {
+			if (user == this.CUSTOMER.user) {
+				checkUser = true;
+			}
+		} else {
+			checkUser = true;
+		}
+
+		if (checkConditions && checkUser) {
+			result = true;
+		}
+		return result;
+	},
+
+    /** 
+     * Description : Lookup an error by error name. Query on x_sccpl_serv_conn_identifying_error_handle table.
+     * @param {string} errorName
+     * @param {string} details
+     * @returns {object} this.response
+     */
+	_responseLookup: function (errorName, details) {
+		return this.responseHandler.responseLookup(this.INTE_TYPE, errorName, details);
+	},
+
+    /** 
+     * Description : Custom the response
+     * @param {string} errorName
+     * @param {string} details
+     * @returns {object} this.response
+     */
+	_responseHandling: function (sccRecord, response) {
+		return this.actionHelper.responseHandling(this.INTE_TYPE, this.TRIGGER, sccRecord, response);
+	},
+
+    /** 
+     * Description : Rollback if there are any errors
+     */
+	_rollBack: function () {
+		//TODO
+	},
+
+    /** 
+     * Description : Re-build data
+     * @param {object} jsonObject
+     * @param {object} endpoint
+     * @returns {string} this.DATA
+     */
+	_rebuildData: function (jsonObject, endpoint) {
+        var result = JSON.stringify(jsonObject);
+		if (endpoint.use_xml && endpoint.xml_content.toString()) {
+			result = this._bindData(jsonObject, endpoint.xml_content.toString());
+		} else if (endpoint.use_json && endpoint.json_content.toString()) {
+			result = this._bindData(jsonObject, endpoint.json_content.toString());
+        }
+		return result;
+	},
+
+    /** 
+     * Description : Bind data
+     * @param {object} jsonObject
+     * @param {string} dataString
+     * @returns {string}
+     */
+	_bindData: function (jsonObject, dataString) {
+		var regex = /^(.*?)\$\{([^\}]+?)\}(.*)$/;
+		var rr = regex.exec(dataString);
+		while (rr) {
+			var fn = rr[2];
+			var fv = jsonObject[fn] || "";
+
+			dataString = rr[1] + fv + rr[3];
+			rr = regex.exec(dataString);
+		}
+		return dataString;
+	},
+
+	type: 'ServiceConnectorBase'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>VinhTr</sys_created_by>
+        <sys_created_on>2020-05-20 10:43:51</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>9f637a07db78d8503e225a84dc961973</sys_id>
+        <sys_mod_count>630</sys_mod_count>
+        <sys_name>ServiceConnectorBase</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_script_include_9f637a07db78d8503e225a84dc961973</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2021-02-04 08:20:59</sys_updated_on>
+    </sys_script_include>
+</record_update>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element audit="true" label="Service Connector Action" max_length="40" name="x_sccpl_serv_conn_service_connector_action" sizeclass="0" type="collection">
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Action" mandatory="true" max_length="40" name="action" type="choice">
+            <choice>
+                <element inactive="true" inactive_on_update="true" label="Insert" sequence="10" value="insert"/>
+                <element inactive="true" inactive_on_update="true" label="Update" sequence="20" value="update"/>
+                <element inactive_on_update="false" label="Acknowledgement" sequence="100" value="acknowledgement"/>
+                <element inactive="true" inactive_on_update="true" label="Error" sequence="100" value="error"/>
+                <element inactive_on_update="false" label="Response" sequence="200" value="response"/>
+                <element inactive_on_update="false" label="Anatomy Data" sequence="300" value="anatomy_data"/>
+            </choice>
+        </element>
+        <element attributes="edge_encryption_enabled=true" calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" default="true" label="Active" max_length="40" name="active" type="boolean"/>
+        <element calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" default="/** Description:&#13;&#10;* Action is Response: response need to be return.&#13;&#10;* - Inbound: 'message' variable is a SCC record (target record)&#13;&#10;* - Outbound: 'message' variable does not available&#13;&#10;* @param {object} response&#13;&#10;* @param {GlideRecord} message&#13;&#10;* @returns {object} response&#13;&#10;******************************&#13;&#10;* Action is Anatomy Data: validate the request body one more time before sending to the customer&#13;&#10;* - Inbound: Not support&#13;&#10;* - Outbound: 'message' variable is the message from Partner Message record&#13;&#10;* @param {object} message&#13;&#10;* @param {boolean} valid_data = true&#13;&#10;* @returns {boolean} valid_data&#13;&#10;*/" label="Description" max_length="4000" name="description" type="string"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Inbound Definition" max_length="32" name="inbound_definition" reference="x_sccpl_serv_conn_inbound_definition" type="reference"/>
+        <element calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" choice="1" label="Integration Type" mandatory="true" max_length="40" name="integration_type" type="string">
+            <choice>
+                <element inactive_on_update="false" label="Inbound" sequence="10" value="inbound"/>
+                <element inactive_on_update="false" label="Outbound" sequence="20" value="outbound"/>
+            </choice>
+        </element>
+        <element label="Method" max_length="200" name="method" type="string"/>
+        <element attributes="edge_encryption_enabled=true" calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" default="100" label="Order" max_length="40" name="order" type="integer"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" label="Outbound Definition" max_length="32" name="outbound_definition" reference="x_sccpl_serv_conn_outbound_definition" reference_qual="active=true^EQ" reference_qual_condition="active=true^EQ" type="reference"/>
+        <element attributes="edge_encryption_enabled=true" default="(function process() {&#13;&#10;    /** &#13;&#10;     * var customResponse = {&#13;&#10;     *      company: message.company.getDisplayValue(),&#13;&#10;     *      scc_number: message.number.getDisplayValue()&#13;&#10;     * };&#13;&#10;     * response = customResponse;&#13;&#10;     */&#13;&#10;&#13;&#10;    //  Enter your code here&#13;&#10;    &#13;&#10;&#13;&#10;})(response);&#13;&#10;&#13;&#10;// (function process() {&#13;&#10;//     /** &#13;&#10;//      * if(message.table = &quot;incident&quot; &amp;&amp; message.number.substring(0, 3) != &quot;INC&quot;) {&#13;&#10;//      *      valid_data = false;&#13;&#10;//      * }&#13;&#10;//      */&#13;&#10;&#13;&#10;//     //  Enter your code here&#13;&#10;    &#13;&#10;&#13;&#10;// })(response);" label="Script" max_length="8000" name="script" type="script"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Script Include" max_length="32" name="script_include" reference="sys_script_include" type="reference"/>
+        <element attributes="edge_encryption_enabled=true" choice="3" default="default" label="Type" max_length="40" name="type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Default" sequence="10" value="default"/>
+                <element inactive_on_update="false" label="Advance" sequence="20" value="advance"/>
+            </choice>
+        </element>
+        <index name="index">
+            <element name="script_include"/>
+        </index>
+        <index name="index2">
+            <element name="outbound_definition"/>
+        </index>
+        <index name="index3">
+            <element name="inbound_definition"/>
+        </index>
+    </element>
+</database>

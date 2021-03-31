@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_sccpl_serv_conn.ServiceConnectorInboundHelper</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>ServiceConnectorInboundHelper</name>
+        <script><![CDATA[var ServiceConnectorInboundHelper = Class.create();
+ServiceConnectorInboundHelper.prototype = Object.extendsObject(ServiceConnectorModel, {
+    initialize: function() {
+        this.commonAction = new ServiceConnectorCommonAction();
+        this.responseHandler = new ServiceConnectorResponseHandler();
+        this.actionHelper = new ServiceConnectorActionHelper();
+        this.attachmentHelper = new ServiceConnectorAttachment();
+
+        this.incidentClass = new ServiceConnectorIncidentClass();
+        this.requestClass = new ServiceConnectorRequestClass();
+        this.problemClass = new ServiceConnectorProblemClass();
+        this.changeClass = new ServiceConnectorChangeClass();
+
+        this.parentRecord = {};
+        this.defaultCatItem = false;
+    },
+
+    /** 
+     * Description : Hanlde Mapping all fields form customer to SCC
+     * @param {object} data Original request
+     * @param {object} trigger this.TRIGGER
+     * @returns {object} { processError: false, data: {} }
+     */
+    mapMessage: function(data, trigger) {
+        var result = {
+            processError: this.processError,
+            data: {}
+        };
+        var table = trigger.TABLE;
+        if (table == this.TABLE_NAME.REQUEST || table == this.TABLE_NAME.RITM || table == this.TABLE_NAME.SC_TASK) {
+            result = this._requestMapMessage(trigger, data);
+        // } else if (table == this.TABLE_NAME.ATTACHMENT) {
+        //     result = this.attachmentHelper.setMimeTypeValue(this._defaultMapMessage(trigger, data));
+        } else {
+            result.data = this._defaultMapMessage(trigger, data);
+            result.processError = false;
+        }
+        return result;
+    },
+
+    /** 
+     * Description : Internal validate before execute the request
+     * @param {object} customer this.CUSTOMER
+     * @param {object} trigger this.TRIGGER
+     * @param {object} data this.DATA
+     * @returns {object} { processError: false, response: {}, sccRecord: {} }
+     */
+    executeRequest: function(customer, trigger, data) {
+        // Prevent this.TRIGGER object is overridden
+        var table = trigger.TABLE;
+        var action = trigger.ACTION;
+        var template = trigger.TEMPLATE || "";
+        this.processError = false;
+
+        var internalCheck = this._internalValidation(customer, trigger, data);
+        if (!internalCheck) {
+            return {
+                processError: true,
+                response: this._responseLookup("invalid_request"),
+                sccRecord: {}
+            };
+        }
+        // Move attachment to other transaction
+        if (table == this.TABLE_NAME.ATTACHMENT) {
+            var tableName = this.commonAction.getTableByPrefix(customer.scc_number);
+            if (!tableName) {
+                this.response = this._responseLookup("table_not_support");
+                this.processError = true;
+            } else {
+                var targetRecord = this.commonAction.recordLookupByNumber(tableName, customer.scc_number);
+                if (!targetRecord.sys_id) {
+                    this.response = this._responseLookup("not_exist");
+                    this.processError = true;
+                } else if (!this.commonAction.isExistCheck(targetRecord.sys_id, customer.customer_number)) {
+                    this.response = this._responseLookup("not_integrated");
+                    this.processError = true;
+                } else {
+                    var attId = this.attachmentHelper.addAttachment(targetRecord, data);
+                    if (!attId) {
+                        this.response = this._responseLookup("error_insert");
+                        this.processError = true;
+                    } else {
+                        this.response = this._responseLookup("success_create");
+                        this.response.scc_number = targetRecord.number.getDisplayValue();
+                        this.response = this._responseHandling(targetRecord, this.response);
+                        this.sccRecord = this.attachmentHelper.getAttachment(attId);
+                    }
+                }
+            }
+
+            return {
+                processError: this.processError,
+                response: this.response,
+                sccRecord: this.sccRecord
+            };
+        }
+
+        // Normal process
+        switch (action) {
+            case this.EXECUTE_ACTION.INSERT:
+                if (this.commonAction.duplicateCheck(customer.customer_number, table)) {
+                    this.response = this._responseLookup("duplicate");
+                    this.processError = true;
+                    break;
+                }
+                this.sccRecord = this._executeInsert(table, data, template);
+                if (!this.sccRecord.sys_id) {
+                    this.response = this._responseLookup("error_insert");
+                    this.processError = true;
+                    break;
+                }
+                this.response = this._responseLookup("success_create");
+                this.response.scc_number = this.sccRecord.number.getDisplayValue();
+                this.response = this._responseHandling(this.sccRecord, this.response);
+                break;
+            case this.EXECUTE_ACTION.UPDATE:
+                this.sccRecord = this.commonAction.recordLookupByNumber(table, customer.scc_number);
+                if (!this.sccRecord.sys_id) {
+                    this.response = this._responseLookup("not_exist");
+                    this.processError = true;
+                    break;
+                }
+                if (!this.commonAction.isExistCheck(this.sccRecord.sys_id, customer.customer_number)) {
+                    this.response = this._responseLookup("not_integrated");
+                    this.processError = true;
+                    break;
+				}
+				this.previousRecord = this.sccRecord;
+                this.sccRecord = this._executeUpdate(table, this.sccRecord.sys_id, data, template);
+                if (!this.sccRecord.sys_id) {
+                    this.response = this._responseLookup("error_update");
+                    this.processError = true;
+                    break;
+                }
+                this.response = this._responseLookup("success_update");
+                this.response.scc_number = this.sccRecord.number.getDisplayValue();
+                this.response = this._responseHandling(this.sccRecord, this.response);
+                break;
+            case this.EXECUTE_ACTION.DELETE:
+                //TODO
+                this.response = this._responseLookup("action_not_support");
+                this.processError = true;
+                break;
+            default:
+                this.response = this._responseLookup("action_not_support");
+                this.processError = true;
+                break;
+        }
+
+        trigger.TABLE = table;
+        trigger.ACTION = action;
+
+        return {
+            processError: this.processError,
+            response: this.response,
+            sccRecord: this.sccRecord
+        };
+    },
+
+    /**
+     * Description : Validate action before mapping data
+     * @param {object} trigger
+     * @param {object} customer
+     * @returns {object}
+     */
+    actionValidation: function(trigger, customer) {
+        var action = trigger.ACTION;
+        var table = trigger.TABLE;
+
+        this.processError = false;
+        if (table != this.TABLE_NAME.ATTACHMENT) {
+            switch (action) {
+                case this.EXECUTE_ACTION.INSERT:
+                    if (this.commonAction.duplicateCheck(customer.customer_number, table)) {
+                        this.response = this._responseLookup("duplicate");
+                        this.processError = true;
+                        break;
+                    }
+                    break;
+                case this.EXECUTE_ACTION.UPDATE:
+                    this.sccRecord = this.commonAction.recordLookupByNumber(table, customer.scc_number);
+                    if (!this.sccRecord.sys_id) {
+                        this.response = this._responseLookup("not_exist");
+                        this.processError = true;
+                        break;
+                    }
+                    if (!this.commonAction.isExistCheck(this.sccRecord.sys_id, customer.customer_number)) {
+                        this.response = this._responseLookup("not_integrated");
+                        this.processError = true;
+                        break;
+                    }
+                    break;
+                default:
+                    this.response = this._responseLookup("action_not_support");
+                    this.processError = true;
+                    break;
+            }
+        }
+        var result = {
+            processError: this.processError,
+            response: this.response
+        };
+        return result;
+    },
+
+    /**  ====================================*/
+    /**      PRIVATE FUNCTIONS */
+    /**===================================== */
+
+    /** 
+     * Description : Internal validation
+     * @param {object} customer this.CUSTOMER
+     * @param {object} trigger this.TRIGGER
+     * @param {object} data this.DATA
+     * @returns {bool}
+     */
+    _internalValidation: function(customer, trigger, data) {
+        var table = trigger.TABLE;
+        var action = trigger.ACTION;
+        var parentNumber = customer.parent_number;
+
+        if (!this._parentCheck(trigger, parentNumber)) {
+            return false;
+        }
+
+        if (table == this.TABLE_NAME.RITM && action == this.EXECUTE_ACTION.INSERT) {
+            if (!data.ritm.cat_item) {
+                return false;
+            }
+            var catItem = this.commonAction.catalogueItemLookup(data.ritm.cat_item);
+            if (!catItem.sys_id) {
+                return false;
+            }
+        }
+
+        if (table == this.TABLE_NAME.ATTACHMENT) {
+            if (!data.file_name) {
+                return false;
+            }
+            if (!data.payload) {
+                return false;
+            }
+//             if (!data.content_type) {
+//                 return false;
+//             }
+        }
+
+        return true;
+    },
+
+    /** 
+     * Description : Check if the reference record already existed
+     * @param {object} trigger this.TRIGGER
+     * @param {string} parentNumber
+     * @returns {bool}
+     */
+    _parentCheck: function(trigger, parentNumber) {
+        var table = trigger.TABLE;
+        var result = false;
+        switch (table) {
+            case this.TABLE_NAME.ITASK:
+                this.parentRecord = this.commonAction.recordLookupByNumber(this.TABLE_NAME.INCIDENT, parentNumber);
+                break;
+            case this.TABLE_NAME.SC_TASK:
+                var inbDef = this.commonAction.recordLookupById(this.TABLE_NAME.INBOUND_DEFINITION, trigger.INBOUND_DEFINITION);
+                if (inbDef.default_cat_item) {
+                    this.defaultCatItem = true;
+                    result = true;
+                    break;
+                }
+                this.parentRecord = this.commonAction.recordLookupByNumber(this.TABLE_NAME.RITM, parentNumber);
+                break;
+            default:
+                result = true;
+                break;
+        }
+        if (this.parentRecord.sys_id) {
+            result = true;
+        }
+        return result;
+    },
+
+    /** 
+     * Description : Insert a record
+     * @param {string} table
+     * @param {object} data this.DATA
+     * @param {string} template sys_id
+     * @returns {object} this.sccRecord
+     */
+    _executeInsert: function(table, data, template) {
+        switch (table) {
+            case this.TABLE_NAME.INCIDENT:
+                this.sccRecord = this.incidentClass.insertIncident(data, template);
+                break;
+            case this.TABLE_NAME.ITASK:
+                this.sccRecord = this.incidentClass.insertIncidentTask(data, template);
+                break;
+            case this.TABLE_NAME.REQUEST:
+                this.sccRecord = this.requestClass.insertRequest(data, template);
+                break;
+            case this.TABLE_NAME.RITM:
+                this.sccRecord = this.requestClass.insertRITM(data, template);
+                break;
+            case this.TABLE_NAME.SC_TASK:
+                if (this.defaultCatItem) {
+                    this.sccRecord = this.requestClass.insertDefaultCatalogTask(data, template);
+                    break;
+                }
+                this.sccRecord = this.requestClass.insertCatalogTask(data, template);
+                break;
+            case this.TABLE_NAME.PROBLEM:
+                this.sccRecord = this.problemClass.insertProblem(data, template);
+                break;
+            case this.TABLE_NAME.CHANGE:
+                this.sccRecord = this.changeClass.insertChange(data, template);
+                break;
+            default:
+                this.response = this._responseLookup("table_not_support");
+                break;
+        }
+        return this.sccRecord;
+    },
+
+    /** 
+     * Description : Update a record
+     * @param {string} table
+     * @param {string} sccId
+     * @param {object} data this.DATA
+     * @param {string} template sys_id
+     * @returns {object} this.sccRecord
+     */
+    _executeUpdate: function(table, sccId, data, template) {
+        switch (table) {
+            case this.TABLE_NAME.INCIDENT:
+                this.sccRecord = this.incidentClass.updateIncident(sccId, data, template);
+                break;
+            case this.TABLE_NAME.ITASK:
+                this.sccRecord = this.incidentClass.updateIncidentTask(sccId, data, template);
+                break;
+            case this.TABLE_NAME.REQUEST:
+                this.sccRecord = this.requestClass.updateRequest(sccId, data, template);
+                break;
+            case this.TABLE_NAME.RITM:
+                this.sccRecord = this.requestClass.updateRitm(sccId, data, template);
+                break;
+            case this.TABLE_NAME.SC_TASK:
+                this.sccRecord = this.requestClass.updateCatalogueTask(sccId, data, template);
+                break;
+            case this.TABLE_NAME.PROBLEM:
+                this.sccRecord = this.problemClass.updateProblem(sccId, data, template);
+                break;
+            case this.TABLE_NAME.CHANGE:
+                this.sccRecord = this.changeClass.updateChange(sccId, data, template);
+                break;
+            default:
+                this.response = this._responseLookup("table_not_support");
+                this.processError = true;
+                break;
+        }
+        return this.sccRecord;
+    },
+
+    /** 
+     * Description : Execute the default mapping for on a table.
+     * @param {object} trigger
+     * @param {object} data
+     * @returns {object}
+     */
+    _defaultMapMessage: function(trigger, data) {
+        var k;
+        var dataObj = {};
+        var gr = new GlideRecord(this.TABLE_NAME.ATTRIBUTE_MAPPING);
+        gr.addQuery("definition_partner", trigger.PARTNER);
+        gr.addQuery("inbound_definition", trigger.INBOUND_DEFINITION);
+
+        var typeQuery = gr.addQuery("integration_type", this.INTEGRATION_TYPE.INBOUND);
+        typeQuery.addOrCondition("integration_type", this.INTEGRATION_TYPE.BOTH);
+
+        gr.addActiveQuery();
+        gr.query();
+        while (gr.next()) {
+            if (gr.data_mapping && gr.getValue("external_field") && data[gr.getValue("external_field")]) {
+                data[gr.getValue("external_field")] = this.commonAction.dataMappingLookup(this.INTEGRATION_TYPE.INBOUND, trigger.TABLE, gr, data[gr.getValue("external_field")]);
+            }
+            for (k in data) {
+                if (gr.getValue("scc_field") && gr.getValue("external_field") && gr.getValue("external_field").toLowerCase() == k.toLowerCase()) {
+                    dataObj[gr.getValue("scc_field")] = data[k] || null;
+                }
+            }
+            if (gr.advanced) {
+                var evaluator = new GlideScopedEvaluator();
+                evaluator.putVariable("input", data[gr.getValue("external_field")]);
+                evaluator.putVariable("message", data);
+                evaluator.putVariable("output", null);
+
+                evaluator.evaluateScript(gr, "script", null);
+
+                dataObj[gr.getValue("scc_field")] = evaluator.getVariable("output");
+            }
+            // Supply check:
+            switch (gr.getValue("supply_value")) {
+                case this.SUPPLY_VALUE.ALWAYS:
+                    break;
+                case this.SUPPLY_VALUE.INSERT_UPDATE:
+                    if (trigger.ACTION != this.SUPPLY_VALUE.INSERT && trigger.ACTION != this.SUPPLY_VALUE.UPDATE) {
+                        delete dataObj[gr.getValue("scc_field")];
+                    }
+                    break;
+                case this.SUPPLY_VALUE.INSERT:
+                    if (trigger.ACTION != this.SUPPLY_VALUE.INSERT) {
+                        delete dataObj[gr.getValue("scc_field")];
+                    }
+                    break;
+                case this.SUPPLY_VALUE.UPDATE:
+                    if (trigger.ACTION != this.SUPPLY_VALUE.UPDATE) {
+                        delete dataObj[gr.getValue("scc_field")];
+                    }
+                    break;
+                default:
+                    this.processError = true;
+                    break;
+            }
+        }
+        if (!dataObj.company) {
+            var user = new GlideRecord(this.TABLE_NAME.SYS_USER);
+            user.get(gs.getUserID());
+            dataObj.company = user.getValue("company") || gs.getUser().getCompanyID();
+        }
+        return dataObj;
+    },
+
+    /** 
+     * Description : Execute request mapping for tables related to the request.
+     * @param {object} trigger
+     * @param {object} data
+     * @returns {object} { processError: false, data: {} }
+     */
+    _requestMapMessage: function(trigger, data) {
+        var k, reqInbDef, ritmInbDef, scTaskInbDef;
+        var reqBuilder = {},
+            ritmBuilder = {},
+            scTaskBuilder = {};
+        var requestObj = {},
+            ritm = {},
+            scTask = {};
+
+        // Prevent this.TRIGGER.INBOUND_DEFINITION value is overridden
+        var currentInbDef = trigger.INBOUND_DEFINITION;
+
+        var table = trigger.TABLE,
+            partner = trigger.PARTNER;
+
+        switch (table) {
+            case this.TABLE_NAME.REQUEST:
+                reqBuilder = this._defaultMapMessage(trigger, data);
+                for (k in reqBuilder) {
+                    requestObj[k] = reqBuilder[k];
+                }
+                break;
+            case this.TABLE_NAME.RITM:
+                ritmBuilder = this._defaultMapMessage(trigger, data);
+                for (k in ritmBuilder) {
+                    ritm[k] = ritmBuilder[k];
+                }
+                reqInbDef = this.commonAction.definitionParterLookup(partner, this.TABLE_NAME.REQUEST);
+                if (reqInbDef.sys_id) {
+                    trigger.INBOUND_DEFINITION = reqInbDef.getValue("sys_id");
+                    reqBuilder = this._defaultMapMessage(trigger, data);
+                    for (k in reqBuilder) {
+                        requestObj[k] = reqBuilder[k];
+                    }
+                }
+                trigger.INBOUND_DEFINITION = reqInbDef.getValue("sys_id");
+                reqBuilder = this._defaultMapMessage(trigger, data);
+                for (k in reqBuilder) {
+                    requestObj[k] = reqBuilder[k];
+                }
+                requestObj.ritm = ritm;
+                scTaskInbDef = this.commonAction.definitionParterLookup(partner, this.TABLE_NAME.SC_TASK);
+                if (!scTaskInbDef.sys_id) {
+                    break;
+                }
+                trigger.INBOUND_DEFINITION = scTaskInbDef.getValue("sys_id");
+                scTaskBuilder = this._defaultMapMessage(trigger, data);
+                for (k in scTaskBuilder) {
+                    scTask[k] = scTaskBuilder[k];
+                }
+                requestObj.scTask = scTask;
+                break;
+            case this.TABLE_NAME.SC_TASK:
+                scTaskBuilder = this._defaultMapMessage(trigger, data);
+                for (k in scTaskBuilder) {
+                    scTask[k] = scTaskBuilder[k];
+                }
+                reqInbDef = this.commonAction.definitionParterLookup(partner, this.TABLE_NAME.REQUEST);
+                if (!reqInbDef.sys_id) {
+                    this.processError = true;
+                    break;
+                }
+                trigger.INBOUND_DEFINITION = reqInbDef.getValue("sys_id");
+                reqBuilder = this._defaultMapMessage(trigger, data);
+                for (k in reqBuilder) {
+                    requestObj[k] = reqBuilder[k];
+                }
+                ritmInbDef = this.commonAction.definitionParterLookup(partner, this.TABLE_NAME.RITM);
+                if (!ritmInbDef.sys_id) {
+                    this.processError = true;
+                    break;
+                }
+                trigger.INBOUND_DEFINITION = ritmInbDef.getValue("sys_id");
+                ritmBuilder = this._defaultMapMessage(trigger, data);
+                for (k in ritmBuilder) {
+                    ritm[k] = ritmBuilder[k];
+                }
+                requestObj.ritm = ritm;
+                requestObj.scTask = scTask;
+                break;
+            default:
+                break;
+        }
+
+        trigger.INBOUND_DEFINITION = currentInbDef;
+        var result = {
+            processError: this.processError,
+            data: requestObj
+        };
+        return result;
+    },
+
+    /** 
+     * Description : Lookup an error by error name. Query on x_sccpl_serv_conn_identifying_error_handle table.
+     * @param {string} errorName
+     * @param {string} details
+     * @returns {object} this.response
+     */
+    _responseLookup: function(errorName, details) {
+        return this.responseHandler.responseLookup(this.INTEGRATION_TYPE.INBOUND, errorName, details);
+    },
+
+    /** 
+     * Description : Custom the response
+     * @param {string} errorName
+     * @param {string} details
+     * @returns {object} this.response
+     */
+    _responseHandling: function(sccRecord, response) {
+        return this.actionHelper.responseHandling(this.INTEGRATION_TYPE.INBOUND, this.TRIGGER, sccRecord, response);
+    },
+
+    type: 'ServiceConnectorInboundHelper'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>QuanTH</sys_created_by>
+        <sys_created_on>2020-06-15 08:28:11</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>140ec4ebdb5d5c103e225a84dc96197c</sys_id>
+        <sys_mod_count>114</sys_mod_count>
+        <sys_name>ServiceConnectorInboundHelper</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_script_include_140ec4ebdb5d5c103e225a84dc96197c</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2020-10-29 07:34:57</sys_updated_on>
+    </sys_script_include>
+</record_update>

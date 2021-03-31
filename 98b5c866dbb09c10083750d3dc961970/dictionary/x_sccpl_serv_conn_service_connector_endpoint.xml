@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element audit="true" label="Service Connector Endpoint" max_length="40" name="x_sccpl_serv_conn_service_connector_endpoint" sizeclass="0" type="collection">
+        <element attributes="edge_encryption_enabled=true" default="true" label="Active" max_length="40" name="active" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Authentication" max_length="40" name="authentication" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Basic" sequence="10" value="basic"/>
+                <element inactive_on_update="false" label="None" sequence="20" value="none"/>
+                <element inactive_on_update="false" label="Oauth 2.0" sequence="30" value="oauth_20"/>
+            </choice>
+        </element>
+        <element calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" label="Endpoint" max_length="200" name="endpoint" type="string"/>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="HTTP Method" max_length="40" name="http_method" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="DELETE" value="DELETE"/>
+                <element inactive_on_update="false" label="PATCH" value="PATCH"/>
+                <element inactive_on_update="false" label="PUT" value="PUT"/>
+                <element inactive_on_update="false" label="GET" sequence="10" value="GET"/>
+                <element inactive_on_update="false" label="POST" sequence="20" value="POST"/>
+            </choice>
+        </element>
+        <element attributes="json_view" label="JSON Content" max_length="4000" name="json_content" type="string"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="MID Server" max_length="32" name="mid_server" reference="ecc_agent" type="reference"/>
+        <element label="Name" max_length="200" name="name" primary="true" type="string"/>
+        <element calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" default="javascript:global.getNextObjNumberPadded();" label="Number" max_length="40" name="number" read_only="true" type="string"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="OAuth profile" max_length="32" name="oauth_profile" reference="oauth_entity" type="reference"/>
+        <element attributes="edge_encryption_enabled=true,no_data_replicate=true" label="Password" max_length="255" name="password" type="password2"/>
+        <element attributes="edge_encryption_enabled=true" calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" default="6000" label="Timeout" max_length="40" name="timeout" type="integer"/>
+        <element label="User Name" max_length="150" name="user_name" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Use JSON" max_length="40" name="use_json" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true" label="Use MID" max_length="40" name="use_mid" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true" label="Use XML" max_length="40" name="use_xml" type="boolean"/>
+        <element label="XML Content" max_length="4000" name="xml_content" type="string"/>
+        <index name="index">
+            <element name="mid_server"/>
+        </index>
+        <index name="index2">
+            <element name="oauth_profile"/>
+        </index>
+    </element>
+</database>

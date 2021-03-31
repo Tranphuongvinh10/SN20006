@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_form_sections form_id="259f8f32db2ed89406e7e79bd3961909" sys_domain="c90a2b444a3623120064ed56263be407" table="x_sccpl_serv_conn_data_mappings" version="3">
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>0</position>
+            <sys_created_by>AnthonyFl</sys_created_by>
+            <sys_created_on>2020-08-14 17:56:50</sys_created_on>
+            <sys_domain>c90a2b444a3623120064ed56263be407</sys_domain>
+            <sys_domain_path/>
+            <sys_id>a99f8f32db2ed89406e7e79bd396190a</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_sccpl_serv_conn_data_mappings" name="x_sccpl_serv_conn_data_mappings" sys_domain="c90a2b444a3623120064ed56263be407" view="Default view">259f8f32db2ed89406e7e79bd3961909</sys_ui_form>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_data_mappings" sys_domain="global" view="Default view">02cad05adbf19cd03e225a84dc96192d</sys_ui_section>
+            <sys_updated_by>AnthonyFl</sys_updated_by>
+            <sys_updated_on>2020-08-14 17:56:50</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>1</position>
+            <sys_created_by>AnthonyFl</sys_created_by>
+            <sys_created_on>2020-08-14 17:56:50</sys_created_on>
+            <sys_domain>c90a2b444a3623120064ed56263be407</sys_domain>
+            <sys_domain_path/>
+            <sys_id>ed9f8f32db2ed89406e7e79bd396190b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_sccpl_serv_conn_data_mappings" name="x_sccpl_serv_conn_data_mappings" sys_domain="c90a2b444a3623120064ed56263be407" view="Default view">259f8f32db2ed89406e7e79bd3961909</sys_ui_form>
+            <sys_ui_section caption="NULL" display_value="" name="x_sccpl_serv_conn_data_mappings" sys_domain="c90a2b444a3623120064ed56263be407" view="Default view">ed7a84b8db89d090083750d3dc961982</sys_ui_section>
+            <sys_updated_by>AnthonyFl</sys_updated_by>
+            <sys_updated_on>2020-08-14 17:56:50</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form action="INSERT_OR_UPDATE">
+            <name>x_sccpl_serv_conn_data_mappings</name>
+            <roles/>
+            <sys_class_name>sys_ui_form</sys_class_name>
+            <sys_created_by>AnthonyFl</sys_created_by>
+            <sys_created_on>2020-08-14 17:56:50</sys_created_on>
+            <sys_customer_update>false</sys_customer_update>
+            <sys_domain>c90a2b444a3623120064ed56263be407</sys_domain>
+            <sys_domain_path>!!!/!!!/!!$/!!!/</sys_domain_path>
+            <sys_id>259f8f32db2ed89406e7e79bd3961909</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_sccpl_serv_conn_data_mappings</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+            <sys_update_name>sys_ui_form_sections_259f8f32db2ed89406e7e79bd3961909</sys_update_name>
+            <sys_updated_by>AnthonyFl</sys_updated_by>
+            <sys_updated_on>2020-08-14 17:56:50</sys_updated_on>
+            <sys_user/>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_form>
+    </sys_ui_form_sections>
+</record_update>

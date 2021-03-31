@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element audit="true" label="Partner Message" max_length="40" name="x_sccpl_serv_conn_partner_message" sizeclass="0" type="collection">
+        <element attributes="edge_encryption_enabled=true" calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" label="Company" max_length="32" name="company" reference="core_company" reference_qual="active=true^customer=true^EQ" reference_qual_condition="active=true^customer=true^EQ" type="reference"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Definition Partner" max_length="32" name="definition_partner" reference="x_sccpl_serv_conn_definition_partner" type="reference"/>
+        <element label="External Number" max_length="200" name="external_number" type="string"/>
+        <element audit="true" label="Header" max_length="5000" name="header" type="string"/>
+        <element label="HTTP Status" max_length="50" name="http_status" type="string"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Inbound Definition" max_length="32" name="inbound_definition" reference="x_sccpl_serv_conn_inbound_definition" type="reference"/>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Integration Type" max_length="40" name="integration_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Inbound" sequence="10" value="inbound"/>
+                <element inactive_on_update="false" label="Outbound" sequence="20" value="outbound"/>
+            </choice>
+        </element>
+        <element audit="true" label="Message" max_length="5000" name="message" type="string"/>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Message Status" max_length="40" name="message_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Insert" sequence="10" value="inserted"/>
+                <element inactive_on_update="false" label="Pending" sequence="20" value="pending"/>
+                <element inactive_on_update="false" label="Processed" sequence="30" value="processed"/>
+                <element inactive_on_update="false" label="Expired" sequence="40" value="expired"/>
+                <element inactive_on_update="false" label="Error" sequence="50" value="error"/>
+            </choice>
+        </element>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Message Type" max_length="40" name="message_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Insert" sequence="10" value="insert"/>
+                <element inactive_on_update="false" label="Update" sequence="20" value="update"/>
+                <element inactive_on_update="false" label="Unknown" sequence="30" value="unknown"/>
+            </choice>
+        </element>
+        <element attributes="ignore_filter_on_new=true" default="javascript:global.getNextObjNumberPadded();" label="Number" max_length="40" name="number" type="string"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" label="Outbound Definition" max_length="32" name="outbound_definition" reference="x_sccpl_serv_conn_outbound_definition" reference_qual="active=true^EQ" reference_qual_condition="active=true^EQ" type="reference"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Outbound Trigger" max_length="32" name="outbound_trigger" reference="x_sccpl_serv_conn_outbound_trigger" reference_qual="active=true^EQ" reference_qual_condition="active=true^EQ" type="reference"/>
+        <element audit="true" label="Response" max_length="5000" name="response" type="string"/>
+        <element attributes="edge_encryption_enabled=true" default="0" label="Retry" max_length="40" name="retry" type="integer"/>
+        <element attributes="edge_encryption_enabled=true" dependent="table" dependent_on_field="table" label="SCC Number" max_length="32" name="scc_number" type="document_id" use_dependent_field="true"/>
+        <element attributes="base_start=true,edge_encryption_enabled=true" label="Table" max_length="80" name="table" type="table_name"/>
+        <index name="index">
+            <element name="scc_number"/>
+        </index>
+        <index name="index2">
+            <element name="outbound_definition"/>
+        </index>
+        <index name="index3">
+            <element name="company"/>
+        </index>
+        <index name="index4">
+            <element name="inbound_definition"/>
+        </index>
+        <index name="index5">
+            <element name="definition_partner"/>
+        </index>
+        <index name="index6">
+            <element name="outbound_trigger"/>
+        </index>
+    </element>
+</database>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_sccpl_serv_conn.ServiceConnectorProblemClass</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>ServiceConnectorProblemClass</name>
+        <script><![CDATA[var ServiceConnectorProblemClass = Class.create();
+ServiceConnectorProblemClass.prototype = Object.extendsObject(ServiceConnectorModel, {
+    initialize: function() {
+    },
+	
+    /**
+	* Insert a problem
+	* @param {object} data
+	* @param {sys_id} template
+	*/
+	insertProblem: function (data, template) {
+		try {
+			var k;
+			var gr = new GlideRecord(this.TABLE_NAME.PROBLEM);
+			gr.initialize();
+			if (template) {
+				var grTemplate = new GlideTemplate.get(template);
+				grTemplate.apply(gr);
+			}
+			for (k in data) {
+				gr[k] = data[k];
+			}
+			gr.insert();
+			return gr;
+		} catch (ex) {
+			gs.info("Insert Problem Fail: ", ex);
+			this.logWarning('Insert problem error: \n' + ex, 'insertProblem');
+		}
+	},
+
+	/**
+    * Update a problem
+    * @param {string} sccRecordId
+	* @param {object} data
+	* @param {sys_id} template
+	*/
+	updateProblem: function (sccRecordId, data, template) {
+		try {
+			var gr = new GlideRecord(this.TABLE_NAME.PROBLEM);
+			gr.get(sccRecordId);
+			var k;
+			if (template) {
+				var grTemplate = new GlideTemplate.get(template);
+				grTemplate.apply(gr);
+			}
+			for (k in data) {
+				if(k != 'company') {
+                    gr[k] = data[k];
+                }
+			}
+			gr.update();
+			return gr;
+		} catch (ex) {
+			gs.info("Update Problem Fail: ", ex);
+			this.logWarning('Update problem error: \n' + ex, 'updateProblem');
+		}
+	},
+
+    type: 'ServiceConnectorProblemClass'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>QuanTH</sys_created_by>
+        <sys_created_on>2020-06-30 06:45:08</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>ed16011cdb3910d03e225a84dc9619cc</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>ServiceConnectorProblemClass</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_script_include_ed16011cdb3910d03e225a84dc9619cc</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2020-10-26 09:34:35</sys_updated_on>
+    </sys_script_include>
+</record_update>

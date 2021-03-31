@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_choice action="INSERT_OR_UPDATE" field="http_method" table="x_sccpl_serv_conn_service_connector_endpoint" version="3">
+        <sys_choice_set action="INSERT_OR_UPDATE">
+            <element>http_method</element>
+            <name>x_sccpl_serv_conn_service_connector_endpoint</name>
+            <sys_class_name>sys_choice_set</sys_class_name>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-06-03 06:31:03</sys_created_on>
+            <sys_customer_update>false</sys_customer_update>
+            <sys_id>80e704f9dbfb1cd04243fdf2f39619a9</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>http_method</sys_name>
+            <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+            <sys_update_name>sys_choice_x_sccpl_serv_conn_service_connector_endpoint_http_method</sys_update_name>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-06-03 06:31:03</sys_updated_on>
+        </sys_choice_set>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>http_method</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>DELETE</label>
+            <language>en</language>
+            <name>x_sccpl_serv_conn_service_connector_endpoint</name>
+            <sequence/>
+            <synonyms/>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-06-03 06:40:27</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>223246abdbcd58d0083750d3dc961942</sys_id>
+            <sys_mod_count>1</sys_mod_count>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-06-03 06:40:34</sys_updated_on>
+            <value>DELETE</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>http_method</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>PATCH</label>
+            <language>en</language>
+            <name>x_sccpl_serv_conn_service_connector_endpoint</name>
+            <sequence/>
+            <synonyms/>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-06-03 06:40:06</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>822246abdbcd58d0083750d3dc961941</sys_id>
+            <sys_mod_count>1</sys_mod_count>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-06-03 06:40:20</sys_updated_on>
+            <value>PATCH</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>http_method</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>PUT</label>
+            <language>en</language>
+            <name>x_sccpl_serv_conn_service_connector_endpoint</name>
+            <sequence/>
+            <synonyms/>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-06-03 06:39:48</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>0b1206abdbcd58d0083750d3dc961926</sys_id>
+            <sys_mod_count>3</sys_mod_count>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-06-03 06:43:22</sys_updated_on>
+            <value>PUT</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>http_method</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>GET</label>
+            <language>en</language>
+            <name>x_sccpl_serv_conn_service_connector_endpoint</name>
+            <sequence>10</sequence>
+            <synonyms/>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-06-03 06:31:03</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>56108667dbcd58d0083750d3dc9619ce</sys_id>
+            <sys_mod_count>6</sys_mod_count>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-04 07:28:37</sys_updated_on>
+            <value>GET</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>http_method</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>POST</label>
+            <language>en</language>
+            <name>x_sccpl_serv_conn_service_connector_endpoint</name>
+            <sequence>20</sequence>
+            <synonyms/>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-06-03 06:31:17</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>7520c267dbcd58d0083750d3dc9619bc</sys_id>
+            <sys_mod_count>6</sys_mod_count>
+            <sys_updated_by>QuanTH</sys_updated_by>
+            <sys_updated_on>2020-06-04 07:48:10</sys_updated_on>
+            <value>POST</value>
+        </sys_choice>
+    </sys_choice>
+</record_update>

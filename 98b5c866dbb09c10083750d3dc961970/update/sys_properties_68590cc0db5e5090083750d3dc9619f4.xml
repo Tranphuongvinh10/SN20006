@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>When an incident is created from a 'hardware' CI or Server&#13;
+&#13;
+Then the Symptom Category should default to 'Hardware - Server' and the Symptom field should default to 'Access Issue'</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_sccpl_serv_conn.rac.subcategory.for.hardware</name>
+        <read_roles/>
+        <suffix>rac.subcategory.for.hardware</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>VinhTr</sys_created_by>
+        <sys_created_on>2020-07-24 04:12:17</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>68590cc0db5e5090083750d3dc9619f4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_sccpl_serv_conn.rac.subcategory.for.hardware</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_properties_68590cc0db5e5090083750d3dc9619f4</sys_update_name>
+        <sys_updated_by>VinhTr</sys_updated_by>
+        <sys_updated_on>2020-07-24 04:12:17</sys_updated_on>
+        <type>string</type>
+        <value>Access Issue</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=68590cc0db5e5090083750d3dc9619f4"/>
+</record_update>
