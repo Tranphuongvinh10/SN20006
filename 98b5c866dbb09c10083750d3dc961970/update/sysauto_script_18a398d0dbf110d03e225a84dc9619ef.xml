@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sysauto_script">
+    <sysauto_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <business_calendar/>
+        <condition/>
+        <conditional>false</conditional>
+        <entered_time/>
+        <name>Retry Outbound Errors</name>
+        <offset/>
+        <offset_type/>
+        <run_as/>
+        <run_as_tz/>
+        <run_dayofmonth>1</run_dayofmonth>
+        <run_dayofweek>1</run_dayofweek>
+        <run_period>1970-01-01 00:01:00</run_period>
+        <run_start>2020-05-21 23:00:00</run_start>
+        <run_time>1970-01-01 00:00:00</run_time>
+        <run_type>periodically</run_type>
+        <script><![CDATA[retry();
+
+function retry() {
+    var scBase = new ServiceConnectorBase();
+	scBase.RETRY = true;
+
+    var retryLimit = gs.getProperty('x_sccpl_serv_conn.SConnector.retryLimit');
+    var recordLimit = gs.getProperty('x_sccpl_serv_conn.SConnector.recordLimit');
+    var retryPolicy = gs.getProperty('x_sccpl_serv_conn.SConnector.retryPolicy');
+    var retryInterval = gs.getProperty('x_sccpl_serv_conn.SConnector.retryInterval');
+
+    var retryCount = 0;
+    while (retryCount < retryLimit) {
+        var opm = new GlideRecord('x_sccpl_serv_conn_partner_message');
+        opm.addQuery('integration_type', 'outbound');
+        opm.addQuery('message_status', 'error');
+        opm.addQuery('retry', retryCount);
+        opm.orderBy('number', 'asc'); //  order by to ensure oldest errors are processed first
+        opm.setLimit(recordLimit);
+        opm.query();
+        while (opm.next()) {
+            // reformat updated date so it can be used in the compare
+            var lastUpdated = new GlideDateTime(opm.sys_updated_on);
+            // allow for first attempt where retry_count is zero.
+            var attempts = opm.retry + 1;
+            var retryWindow = "";
+            // calculate the retry window depending on retry policy
+            if (retryPolicy == "int") {
+                // interval
+                retryWindow = (attempts - 1) * (retryInterval);
+            } else {
+                // exponential backout
+                retryWindow = retryInterval * (Math.pow(2, attempts - 1) / 2);
+            }
+            lastUpdated.addSeconds(retryWindow);
+            var timeNow = new GlideDateTime();
+            // retry if now is greater than the last update time plus the retry window
+            if (1 == timeNow.compareTo(lastUpdated)) {
+                // if the message payload wasn't created try again else try sending the message again
+                if (!opm.message) {
+                    scBase.recreatePayload(opm);
+                } else {
+					scBase.sendOutboundRequest(opm);
+                }
+                opm.retry++;
+                if (opm.retry == retryLimit && opm.message_status == 'error') {
+                    opm.setValue('message_status', 'expired');
+                }
+                opm.update();
+            }
+        }
+        retryCount++;
+    }
+}]]></script>
+        <sys_class_name>sysauto_script</sys_class_name>
+        <sys_created_by>QuanTH</sys_created_by>
+        <sys_created_on>2020-06-30 03:07:53</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>18a398d0dbf110d03e225a84dc9619ef</sys_id>
+        <sys_mod_count>28</sys_mod_count>
+        <sys_name>Retry Outbound Errors</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sysauto_script_18a398d0dbf110d03e225a84dc9619ef</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2020-11-10 09:42:53</sys_updated_on>
+        <time_zone/>
+        <upgrade_safe>false</upgrade_safe>
+    </sysauto_script>
+</record_update>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_choice action="INSERT_OR_UPDATE" field="action" table="x_sccpl_serv_conn_inbound_definition" version="3">
+        <sys_choice_set action="INSERT_OR_UPDATE">
+            <element>action</element>
+            <name>x_sccpl_serv_conn_inbound_definition</name>
+            <sys_class_name>sys_choice_set</sys_class_name>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-05-19 06:26:12</sys_created_on>
+            <sys_customer_update>false</sys_customer_update>
+            <sys_id>b3d704f9dbfb1cd04243fdf2f3961910</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>action</sys_name>
+            <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+            <sys_update_name>sys_choice_x_sccpl_serv_conn_inbound_definition_action</sys_update_name>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-05-19 06:26:12</sys_updated_on>
+        </sys_choice_set>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>action</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Insert</label>
+            <language>en</language>
+            <name>x_sccpl_serv_conn_inbound_definition</name>
+            <sequence>10</sequence>
+            <synonyms/>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-05-19 06:26:12</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>c72fa8fadb7058503e225a84dc9619da</sys_id>
+            <sys_mod_count>2</sys_mod_count>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-05-19 06:26:21</sys_updated_on>
+            <value>insert</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>action</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Update</label>
+            <language>en</language>
+            <name>x_sccpl_serv_conn_inbound_definition</name>
+            <sequence>20</sequence>
+            <synonyms/>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-05-19 06:26:26</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>a43fecbadb7058503e225a84dc961994</sys_id>
+            <sys_mod_count>2</sys_mod_count>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-05-19 06:26:36</sys_updated_on>
+            <value>update</value>
+        </sys_choice>
+    </sys_choice>
+</record_update>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role">
+    <sys_security_acl_role action="INSERT_OR_UPDATE">
+        <sys_class_name>sys_security_acl_role</sys_class_name>
+        <sys_created_by>QuanTH</sys_created_by>
+        <sys_created_on>2020-06-02 06:58:31</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>eadc381fdbc51cd03e225a84dc961993</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_sccpl_serv_conn_outbound_definition.x_sccpl_serv_conn.outbound_definition_user</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_security_acl display_value="x_sccpl_serv_conn_outbound_definition">2adc381fdbc51cd03e225a84dc96198e</sys_security_acl>
+        <sys_update_name>sys_security_acl_role_eadc381fdbc51cd03e225a84dc961993</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2020-06-02 06:58:31</sys_updated_on>
+        <sys_user_role display_value="x_sccpl_serv_conn.outbound_definition_user" name="x_sccpl_serv_conn.outbound_definition_user">1adcf4dbdbc51cd03e225a84dc961988</sys_user_role>
+        <transaction_id/>
+    </sys_security_acl_role>
+</record_update>

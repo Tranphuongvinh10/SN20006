@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_sccpl_serv_conn.ServiceConnectorActionHelper</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>ServiceConnectorActionHelper</name>
+        <script><![CDATA[var ServiceConnectorActionHelper = Class.create();
+ServiceConnectorActionHelper.prototype = Object.extendsObject(ServiceConnectorModel, {
+
+    /** 
+     * Description : Custom the response
+     * @param {string} integrationType
+     * @param {object} trigger
+     * @param {object} sccRecord
+     * @param {object} response
+     * @returns {object} customResponse
+     */
+    responseHandling: function(integrationType, trigger, sccRecord, response) {
+        var customResponse = response;
+        var gr = new GlideRecord(this.TABLE_NAME.SC_ACTION);
+        gr.addQuery("integration_type", integrationType);
+
+        if (integrationType == this.INTEGRATION_TYPE.INBOUND) {
+            gr.addQuery("inbound_definition", trigger.INBOUND_DEFINITION);
+        }
+        if (integrationType == this.INTEGRATION_TYPE.OUTBOUND) {
+            gr.addQuery("outbound_definition", trigger.OUTBOUND_DEFINITION);
+        }
+
+        gr.addQuery("action", this.SC_ACTION.RESPONSE);
+        gr.addQuery("type", "default"); //advance will be inplemented in next phases
+        gr.addActiveQuery();
+        gr.orderBy("order");
+        gr.query();
+
+        while (gr.next()) {
+            var evaluator = new GlideScopedEvaluator();
+            evaluator.putVariable("response", customResponse);
+            evaluator.putVariable("message", sccRecord);
+
+            evaluator.evaluateScript(gr, "script", null);
+
+            customResponse = evaluator.getVariable("response");
+        }
+        return customResponse;
+    },
+
+    acknowledgement: function(integrationType, trigger, sccRecord, previousRecord) {
+        var gr = new GlideRecord(this.TABLE_NAME.SC_ACTION);
+        gr.addQuery("integration_type", integrationType);
+
+        if (integrationType == this.INTEGRATION_TYPE.INBOUND) {
+            gr.addQuery("inbound_definition", trigger.INBOUND_DEFINITION);
+        }
+        if (integrationType == this.INTEGRATION_TYPE.OUTBOUND) {
+            gr.addQuery("outbound_definition", trigger.OUTBOUND_DEFINITION);
+        }
+
+        gr.addQuery("action", this.SC_ACTION.ACKNOWLEDGEMENT);
+        gr.addQuery("type", "default"); //advance will be inplemented in next phases
+        gr.addActiveQuery();
+        gr.orderBy("order");
+        gr.query();
+
+        while (gr.next()) {
+            var evaluator = new GlideScopedEvaluator();
+            evaluator.putVariable("current", sccRecord);
+			evaluator.putVariable("previous", previousRecord);		
+
+            evaluator.evaluateScript(gr, "script", null);
+        }
+    },
+
+    anatomyData: function(data) {
+        var integrationType = data.getValue("integration_type");
+        if(!integrationType) {
+            return false;
+        }
+
+        var requestBody = data.getValue("message");
+        if(requestBody.length <= 7) {
+            return false;
+        }
+
+		try {
+			var requestObj = JSON.parse(requestBody);	
+		} catch (e) {
+			var requestObj = requestBody;	
+		}
+
+        var gr = new GlideRecord(this.TABLE_NAME.SC_ACTION);
+        gr.addQuery("integration_type", integrationType);
+
+        if (integrationType == this.INTEGRATION_TYPE.INBOUND) {
+            gr.addQuery("inbound_definition", data.getValue("inbound_definition"));
+        }
+        if (integrationType == this.INTEGRATION_TYPE.OUTBOUND) {
+            gr.addQuery("outbound_definition", data.getValue("outbound_definition"));
+        }
+
+        gr.addQuery("action", this.SC_ACTION.ANATOMY_DATA);
+        gr.addQuery("type", "default"); //advance will be inplemented in next phases
+        gr.addActiveQuery();
+        gr.orderBy("order");
+        gr.query();
+
+        while (gr.next()) {
+            var evaluator = new GlideScopedEvaluator();
+            evaluator.putVariable("message", requestObj);
+            evaluator.putVariable("valid_data", true);
+
+            evaluator.evaluateScript(gr, "script", null);
+            
+            if(!evaluator.getVariable("valid_data")) {
+                return false;
+            }
+        }
+        return true;
+    },
+
+    type: 'ServiceConnectorActionHelper'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>QuanTH</sys_created_by>
+        <sys_created_on>2020-06-16 03:57:45</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>d3a950f7db1ddc103e225a84dc961979</sys_id>
+        <sys_mod_count>23</sys_mod_count>
+        <sys_name>ServiceConnectorActionHelper</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_script_include_d3a950f7db1ddc103e225a84dc961979</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2021-02-05 03:37:41</sys_updated_on>
+    </sys_script_include>
+</record_update>

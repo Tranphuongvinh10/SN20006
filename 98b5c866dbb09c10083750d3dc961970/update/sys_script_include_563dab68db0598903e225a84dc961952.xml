@@ -1,0 +1,705 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_sccpl_serv_conn.ServiceConnectorCommonAction</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>ServiceConnectorCommonAction</name>
+        <script><![CDATA[var ServiceConnectorCommonAction = Class.create();
+ServiceConnectorCommonAction.prototype = Object.extendsObject(ServiceConnectorModel, {
+
+    /** 
+     * Description : Create customer object base on data on key field and 'x_sccpl_serv_conn_identifying_customer_model' table.
+     * @param {string} data
+     * @param {string} keyField
+     * @returns {object}
+     */
+    mappingCustomerData: function (data, keyField) {
+        var k;
+        var customer = {};
+        var gr = new GlideRecord(this.TABLE_NAME.CUSTOMER);
+        gr.addActiveQuery();
+        gr.query();
+        while (gr.next()) {
+            for (k in data) {
+                if (data[k] && gr.getValue("customer_field") == k) {
+                    if (gr.getValue("scc_field") == "customer_number" && gr.getValue("customer_field") != keyField) {
+                        if (customer.customer_number) {
+                            customer.customer_number = "";
+                        }
+                    } else if (gr.getValue("scc_field") == "scc_number" && gr.getValue("customer_field") == keyField) {
+                        customer.scc_field = "";
+                    } else {
+                        customer[gr.getValue("scc_field")] = data[k];
+                    }
+                }
+            }
+        }
+        customer.user = gs.getUserID();
+        return customer;
+    },
+
+    /** 
+     * Description : Rebuild trigger object
+     * @param {object} partnerMessage
+     * @return {object}
+     */
+    triggerRebuild: function (partnerMessage) {
+        return {
+            PARTNER: String(partnerMessage.definition_partner),
+            TABLE: String(partnerMessage.table),
+            ACTION: String(partnerMessage.message_type),
+            TEMPLATE: "",
+            INBOUND_DEFINITION: "",
+            OUTBOUND_DEFINITION: String(partnerMessage.outbound_definition),
+            OUTBOUND_TRIGGER: String(partnerMessage.outbound_trigger)
+        };
+    },
+
+    /** 
+     * Description : Get partner name by partner id value (sys_id). Query on 'x_sccpl_serv_conn_definition_partner' table.
+     * @param {string} partner
+     * @return {string}
+     */
+    definitionParterNameLookup: function (partner) {
+        var gr = this.recordLookupById(this.TABLE_NAME.DEFINITION_PARTNER, partner);
+        var partnerName = gr.getValue("external_partner");
+        return partnerName || "";
+    },
+
+    /** 
+     * Description : Get partner by table name and definition partner value (sys_id). Query on 'x_sccpl_serv_conn_definition_partner' table.
+     * @param {string} partner
+     * @param {string} tableName
+     * @return {object}
+     */
+    definitionParterLookup: function (partner, tableName) {
+        var result = {};
+        var gr = new GlideRecord(this.TABLE_NAME.INBOUND_DEFINITION);
+        gr.addQuery("table", tableName);
+        gr.addQuery("definition_partner", partner);
+        gr.addActiveQuery();
+        gr.setLimit(1);
+        gr.query();
+        while (gr.next()) {
+            result = gr;
+        }
+        return result;
+    },
+
+    /** 
+     * Description : Get an endpoint by outbound trigger or outbound_definition. Query on 'x_sccpl_serv_conn_service_connector_endpoint' table
+     * @param {object} trigger this.TRIGGER
+     * @return {object} endpoint
+     */
+    endpointLookup: function (trigger) {
+        var endpointId = "";
+        if (trigger.OUTBOUND_TRIGGER) {
+            var outTrig = this.recordLookupById(this.TABLE_NAME.OUTBOUND_TRIGGER, trigger.OUTBOUND_TRIGGER);
+            endpointId = String(outTrig.endpoint);
+        }
+        if (!endpointId) {
+            var outDef = this.recordLookupById(this.TABLE_NAME.OUTBOUND_DEFINITION, trigger.OUTBOUND_DEFINITION);
+            endpointId = String(outDef.endpoint);
+        }
+
+        var gr = new GlideRecord(this.TABLE_NAME.SC_ENDPOINT);
+        gr.get(endpointId);
+        return gr || "";
+    },
+
+    /** 
+     * Description : Checking scrtip condition
+     * @param {object} record
+     * @param {string} fieldName
+     * @param {object} data
+     * @returns {bool} 
+     */
+    scriptCondition: function (record, fieldName, data) {
+        var evaluator = new GlideScopedEvaluator();
+        evaluator.putVariable("message", data);
+        return evaluator.evaluateScript(record, fieldName, "");
+    },
+
+    /** 
+     * Description : Check an existed record with scc_record_id value. Query on 'x_sccpl_serv_conn_external_reference' table.
+     * @param {string} sccRecordId
+     * @param {string} customerNumber
+     * @return {bool} 
+     */
+    isExistCheck: function (sccRecordId, customerNumber) {
+        var result = false;
+        var gr = new GlideRecord(this.TABLE_NAME.PARTNER_MESSAGE);
+        var query = gr.addQuery("scc_number", sccRecordId);
+        if (customerNumber) {
+            query.addOrCondition("external_number", customerNumber);
+        }
+        gr.addQuery("message_status", this.MESSAGE_STATUS.PROCESSED);
+        gr.addQuery("message_type", this.EXECUTE_ACTION.INSERT);
+        gr.addActiveQuery();
+        gr.query();
+        while (gr.next()) {
+            result = true;
+            break;
+        }
+        return result;
+    },
+
+    /** 
+     * Description : Check an existed record with scc_record_id AND external_record_id value. Query on 'x_sccpl_serv_conn_external_reference' table.
+     * @param {string} sccRecordId
+     * @return {bool} 
+     */
+    duplicateCheck: function (customerNumber, tableName) {
+        var result = false;
+        var gr = new GlideRecord(this.TABLE_NAME.EXTERNAL_REFERENCES);
+        gr.addQuery("external_record_id", customerNumber);
+        gr.addQuery("table", tableName);
+        gr.query();
+        while (gr.next()) {
+            if (gr.scc_record_id) {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    },
+
+    /** 
+     * Description : Handle to determine the action type
+     * @param {object} customer
+     * @return {string} 
+     */
+    identifyAction: function (customer) {
+        var action = "unknown";
+        if (customer["customer_number"]) {
+            if (!customer["scc_number"]) {
+                action = "insert";
+            } else {
+                action = "update";
+            }
+        } else {
+            if (customer["scc_number"]) {
+                action = "update";
+            }
+        }
+        return action;
+    },
+
+    /** 
+     * Description : Determine request type
+     * @param {string} firstCharacter
+     * @returns {string}
+     */
+    getMessageType: function (firstCharacter) {
+        var result = "";
+        switch (firstCharacter) {
+            case "<":
+                result = "xml";
+                break;
+            case "{":
+                result = "json";
+                break;
+            default:
+                //error message
+                break;
+        }
+        return result;
+    },
+
+    /** 
+     * Description : Record lookup by sys_id
+     * @param {string} tableName
+     * @param {string} sysId
+     * @returns {GlideRecord} || null
+     */
+    recordLookupById: function (tableName, sys_id) {
+        var gr = new GlideRecord(tableName);
+        gr.addQuery("sys_id", sys_id);
+        gr.query();
+        if (gr.next()) {
+            return gr;
+        }
+        return null;
+    },
+
+    /** 
+     * Description : Record lookup by number
+     * @param {string} tableName
+     * @param {string} sysId
+     * @returns {object}
+     */
+    recordLookupByNumber: function (tableName, number) {
+        var result = {};
+        var gr = new GlideRecord(tableName);
+        gr.addQuery("number", number);
+        gr.addActiveQuery();
+        gr.query();
+        while (gr.next()) {
+            result = gr;
+            break;
+        }
+        return result;
+    },
+
+    /** 
+     * Description : Lookup an catalogue item. Query on sc_cat_item table.
+     * @param {string} itemName
+     * @returns {object}
+     */
+    catalogueItemLookup: function (itemName) {
+        var result = {};
+        var gr = new GlideRecord(this.TABLE_NAME.SC_CAT_ITEM);
+        gr.addQuery("name", itemName);
+        gr.addActiveQuery();
+        gr.query();
+        while (gr.next()) {
+            result = gr;
+            break;
+        }
+        return result;
+    },
+
+    /**
+     * Description : Get table name by the prefix from this.CUSTOMER.scc_number value
+     * @param {string} sccNumber
+     * @returns {string}
+     */
+    getTableByPrefix: function (sccNumber) {
+        var tableName = "";
+        if (sccNumber.substring(0, 3) == "INC") {
+            tableName = this.TABLE_NAME.INCIDENT;
+        } else if (sccNumber.substring(0, 5) == "ITASK") {
+            tableName = this.TABLE_NAME.ITASK;
+        } else if (sccNumber.substring(0, 3) == "REQ") {
+            tableName = this.TABLE_NAME.REQUEST;
+        } else if (sccNumber.substring(0, 4) == "RITM") {
+            tableName = this.TABLE_NAME.RITM;
+        } else if (sccNumber.substring(0, 4) == "TASK") {
+            tableName = this.TABLE_NAME.SC_TASK;
+        } else if (sccNumber.substring(0, 3) == "PRB") {
+            tableName = this.TABLE_NAME.PROBLEM;
+        } else if (sccNumber.substring(0, 3) == "CHG") {
+            tableName = this.TABLE_NAME.CHANGE;
+        }
+        return tableName;
+    },
+
+    /** 
+     *Description : Check exist location by name
+     *Parmeters: empty    
+     * isExistLocationByName
+     * @returns {bool}
+     */
+    isExistLocationByName: function (data) {
+        var location = {
+            sys_id: '',
+            is_exist: false
+        };
+        var locationName = '';
+        if (data.hasOwnProperty("location") && data.location != '') {
+            locationName = data.location;
+        }
+
+        if (locationName != '') {
+            var grLocationName = new GlideRecord(this.TABLE_NAME.LOCATION);
+            grLocationName.addQuery('name', locationName);
+            grLocationName.addQuery('u_state', 'Active');
+            grLocationName.addQuery('company', data.company);
+            grLocationName.query();
+            if (grLocationName.next()) {
+                location.sys_id = grLocationName.sys_id + '';
+                location.is_exist = true;
+            }
+        }
+        return location;
+    },
+
+    /**
+     * Create a record in cmn_location table
+     *
+     * @param {object} data
+     * @param 
+     * @returns string || object
+     */
+    createLocation: function (data) {
+
+        var location = {
+            sys_id: '',
+            is_exist: false
+        };
+
+        var locationFieldArray = '';
+        var locationField = '';
+
+        if (data.hasOwnProperty("location.u_country") && data["location.u_country"] != '') {
+            data["location.u_country"] = this.findCountry(data["location.u_country"]);
+        }
+
+        var grLocation = new GlideRecord(this.TABLE_NAME.LOCATION);
+        grLocation.initialize();
+        for (k in data) {
+            if (k.match("location.")) {
+                locationFieldArray = k.split('.');
+                locationField = locationFieldArray[1];
+                grLocation.setValue(locationField, data[k]);
+            }
+        }
+        if (data.hasOwnProperty("company")) {
+            grLocation.company = data.company;
+        }
+        if (data.hasOwnProperty('location') && data.location != '') {
+            grLocation.name = data.location;
+        }
+        if (grLocation.name == '') {
+            if (data.hasOwnProperty('location.street') && data['location.street'] != '') {
+                grLocation.name = data['location.street'];
+            }
+        }
+        if (grLocation.insert()) {
+            location.sys_id = grLocation.getValue('sys_id');
+            location.is_exist = true;
+        }
+        return location;
+    },
+
+     /** 
+     * Description : Country lookup by Name OR ISO Long OR ISO Short
+     * @param {string} tableName
+     * @param {string} sysId
+     * @returns {object}
+     */
+    findCountry: function(countryName) {
+        var countryId = "";
+        var gr = new GlideRecord(this.TABLE_NAME.COUNTRY);
+        var queryName = gr.addQuery("name", countryName);
+        queryName.addOrCondition("iso3166_2", countryName);
+        queryName.addOrCondition("iso3166_3", countryName);
+        gr.addActiveQuery();
+        gr.setLimit(1);
+        gr.query();
+        if(gr.next()) {
+            countryId = gr.getValue("sys_id");
+        }
+        return countryId;
+    },
+
+    /**
+     * check exist CMDB CI
+     * isExistCMDBCI
+     * @param {object} data
+     * @returns string || 
+     */
+    isExistCMDBCI: function (data) {
+        var device_name = '';
+        var device_serial = '';
+        var queryString = '';
+        var cmdb_ci = {
+            sys_id: '',
+            sys_class_name: '',
+            is_exist: false
+        };
+        if (data.hasOwnProperty("cmdb_ci") && data.cmdb_ci) {
+            device_name = data.cmdb_ci;
+        }
+        if (data.hasOwnProperty("cmdb_ci.serial_number") && data["cmdb_ci.serial_number"]) {
+            device_serial = data["cmdb_ci.serial_number"];
+        }
+        if (device_name || device_serial) {
+            if (device_name != '' && device_serial != '') {
+                queryString = 'company=' + data.company + '^serial_number=' + device_serial + '^ORname=' + device_name;
+            } else if (device_name != '' && device_serial == '') {
+                queryString = 'company=' + data.company + '^name=' + device_name;
+            } else {
+                queryString = 'company=' + data.company + '^serial_number=' + device_serial;
+            }
+            var grExistCMDB = new GlideRecord(this.TABLE_NAME.CMDB_CI);
+            grExistCMDB.addEncodedQuery(queryString);
+            grExistCMDB.query();
+            if (grExistCMDB.next()) {
+                cmdb_ci.sys_id = grExistCMDB.sys_id + '';
+                cmdb_ci.sys_class_name = grExistCMDB.sys_class_name + '';
+                cmdb_ci.is_exist = true;
+
+            }
+        }
+        return cmdb_ci;
+    },
+
+    /** 
+     * Description : Create CI on device_name, company and class 'Proposed CI'.
+     * @param {string} company
+     * @param {string} device_name
+     * @returns {string}
+     */
+    createCMDBCI: function (data) {
+        var cmdb_ci = {
+            sys_id: '',
+            is_exist: false
+        };
+
+        var ciFieldArray = '';
+        var ciField = '';
+        var class_name = '';
+        var name = '';
+        var serial_number = '';
+        var asset_tag = '';
+
+        if (data.hasOwnProperty("cmdb_ci.class_name") && data["cmdb_ci.class_name"]) {
+            class_name = data['cmdb_ci.class_name'];
+            class_name = this._isExistCMDBClass(class_name);
+        }
+        if (data.hasOwnProperty("cmdb_ci") && data["cmdb_ci"]) {
+            name = data["cmdb_ci"];
+        }
+        if (data.hasOwnProperty("cmdb_ci.asset_tag") && data["cmdb_ci.asset_tag"]) {
+            asset_tag = data["cmdb_ci.asset_tag"];
+        }
+
+        if (data.hasOwnProperty("cmdb_ci.serial_number") && data["cmdb_ci.serial_number"]) {
+            serial_number = data["cmdb_ci.serial_number"];
+        }
+
+        if (class_name != '' && name != '') {
+            var grCI = new GlideRecord(this.TABLE_NAME.CMDB_CI);
+            grCI.initialize();
+            for (k in data) {
+                if (k.match("cmdb_ci.")) {
+                    ciFieldArray = k.split('.');
+                    ciField = ciFieldArray[1];
+                    grCI.setValue(ciField, data[k]);
+                }
+            }
+            grCI.setValue('company', data.company);
+            grCI.setValue('sys_class_name', class_name);
+            grCI.setValue('name', name);
+            if (asset_tag == '') {
+                grCI.setValue('asset_tag', name);
+            }
+            if (grCI.insert()) {
+                cmdb_ci.sys_id = grCI.getValue("sys_id");
+                cmdb_ci.is_exist = true;
+            }
+        }
+        return cmdb_ci;
+    },
+    /** 
+     *Description :     
+     * _isExistCMDBClass
+     * @param {string} class_name   
+     * @returns {string}
+     */
+    _isExistCMDBClass: function (class_name) {
+        var cmdbClass = '';
+        var grExistClass = new GlideRecord(this.TABLE_NAME.SYS_DB_OBJECT);
+        grExistClass.addQuery('label', class_name);
+        grExistClass.query();
+        if (grExistClass.next()) {
+            cmdbClass = grExistClass.name + '';
+        }
+        return cmdbClass;
+    },
+
+    /**
+     * check exist ASSET
+     * isExistAsset
+     * @param {object} data
+     * @returns string || 
+     */
+    isExistAsset: function (data) {
+        var asset_tag = '';
+        var asset = {
+            sys_id: '',
+            cmdb_ci: '',
+            is_exist: false
+        };
+
+        if (data.hasOwnProperty("asset_tag") && data.asset_tag != '') {
+            asset_tag = data.asset_tag;
+        }
+        if (asset_tag != '') {
+            var grExistAsset = new GlideRecord(this.TABLE_NAME.ASSET);
+            grExistAsset.addQuery('asset_tag', asset_tag);
+            grExistAsset.addNotNullQuery('ci');
+            grExistAsset.addQuery('install_status', '!=', 1);
+            grExistAsset.orderByDesc('sys_updated_on');
+            grExistAsset.query();
+            if (grExistAsset.next()) {
+                asset.sys_id = grExistAsset.sys_id + '';
+                asset.cmdb_ci = grExistAsset.ci + '';
+                asset.is_exist = true;
+            }
+        }
+        return asset;
+    },
+
+    /** 
+     * Description : Create asset
+     * @param {object} data    
+     * @returns {object}
+     */
+    createAsset: function (data) {
+        var asset = {
+            sys_id: '',
+            cmdb_ci: '',
+            is_exist: false
+        };
+
+        var assetFieldArray = '';
+        var assetField = '';
+        var asset_tag = '';
+        var model = '';
+        var model_category = '';
+        var sys_class_name = '';
+
+        if (data.hasOwnProperty("sys_class_name") && data["sys_class_name"]) {
+            sys_class_name = data["sys_class_name"];
+        }
+        if (data.hasOwnProperty("asset_tag") && data["asset_tag"]) {
+            asset_tag = data['asset_tag'];
+        }
+        if (data.hasOwnProperty("model") && data["model"]) {
+            model = data["model"];
+        }
+        if (data.hasOwnProperty("model_category") && data["model_category"]) {
+            model_category = data["model_category"];
+            if (sys_class_name == '') {
+                sys_class_name = this._isExistAssetClass(model_category);
+            }
+        }
+
+        if (sys_class_name == '') {
+            sys_class_name = this.TABLE_NAME.HARDWARE;
+        }
+        //TODO
+        /*
+                if (sys_class_name != '' && asset_tag != '') {
+                    var grCI = new GlideRecord(this.TABLE_NAME.ASSET);
+                    grCI.initialize();
+                    for (k in data) {
+                        if (k.match("asset.")) {
+                            assetFieldArray = k.split('.');
+                            assetField = assetFieldArray[1];
+                            grCI.setValue(assetField, data[k]);
+                        }
+                    }
+                    grCI.company = data.company;
+                    if (grCI.insert()) {
+                        cmdb_ci.sys_id = grCI.getValue("sys_id");
+                        cmdb_ci.is_exist = true;
+                    }
+                }
+                */
+        return cmdb_ci;
+    },
+
+    /** 
+     *Description :     
+     * _isExistAssetClass
+     * @param {string} model_category   
+     * @returns {string}
+     */
+    _isExistAssetClass: function (model_category) {
+        var assetClass = '';
+        var grExistAC = new GlideRecord(this.TABLE_NAME.CMDB_MODEL_CATEGORY);
+        grExistAC.addQuery('sys_id.name', model_category);
+        grExistAC.query();
+        if (grExistAC.next()) {
+            assetClass = grExistAC.asset_class + '';
+        }
+        return assetClass;
+    },
+
+
+    /**
+     * Description : Lookup an insert successfully message. Query on 'x_sccpl_serv_conn_partner_message' table
+     * @param {string} sccId 
+     * @returns {bool}
+     */
+    insertSuccessMessage: function (sccId) {
+        var result = false;
+        var gr = new GlideRecord(this.TABLE_NAME.PARTNER_MESSAGE);
+        gr.addQuery("message_type", this.EXECUTE_ACTION.INSERT);
+        gr.addQuery("message_status", this.MESSAGE_STATUS.PROCESSED);
+        gr.addQuery("scc_number", sccId);
+        gr.query();
+        while (gr.next()) {
+            if (gr.external_number) {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    },
+
+    /**
+     * Description : Data mapping lookup. Apply when attribute mapping has data mapping flag is true
+     * @param {string} inteType
+     * @param {string} table
+     * @param {GlideRecord} record
+     * @param {string} value
+     * @returns {string}
+     */
+    dataMappingLookup: function (inteType, table, record, value) {
+        var result = value;
+
+        var definitionPartner = record.getValue("definition_partner"),
+            sccField = record.getValue("scc_field") || "",
+            externalField = record.getValue("external_field") || "";
+
+        var gr = new GlideRecord(this.TABLE_NAME.DATA_MAPPING);
+        gr.addQuery("definition_partner", definitionPartner);
+        gr.addQuery("table_name", table);
+
+        var typeQuery = gr.addQuery("integration_type", inteType);
+        typeQuery.addOrCondition("integration_type", this.INTEGRATION_TYPE.BOTH);
+
+        if (inteType == this.INTEGRATION_TYPE.INBOUND) {
+            if (sccField == "") {
+                return result;
+            }
+            gr.addQuery("target_field", sccField);
+            var externalQuery = gr.addQuery("external_field_name", value);
+            externalQuery.addOrCondition("external_field_value", value);
+        } else {
+            if (externalField == "") {
+                return result;
+            }
+            gr.addQuery("target_field", externalField);
+            gr.addQuery("scc_field_value", value);
+        }
+
+        gr.addActiveQuery();
+        gr.setLimit(1);
+        gr.query();
+
+        if (gr.next()) {
+            if (inteType == this.INTEGRATION_TYPE.INBOUND) {
+                result = gr.getValue("scc_field_value");
+            } else {
+                result = gr.getValue("external_field_value");
+            }
+        }
+        return result;
+    },
+
+    type: 'ServiceConnectorCommonAction'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>QuanTH</sys_created_by>
+        <sys_created_on>2020-05-25 06:46:16</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>563dab68db0598903e225a84dc961952</sys_id>
+        <sys_mod_count>161</sys_mod_count>
+        <sys_name>ServiceConnectorCommonAction</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_script_include_563dab68db0598903e225a84dc961952</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2021-02-04 09:22:25</sys_updated_on>
+    </sys_script_include>
+</record_update>

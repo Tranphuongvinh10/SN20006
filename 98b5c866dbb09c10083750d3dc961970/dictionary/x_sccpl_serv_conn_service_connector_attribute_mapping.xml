@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element audit="true" label="Service Connector Attribute Mapping" max_length="40" name="x_sccpl_serv_conn_service_connector_attribute_mapping" sizeclass="0" type="collection">
+        <element attributes="edge_encryption_enabled=true" default="true" label="Active" max_length="40" name="active" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true" label="Advanced" max_length="40" name="advanced" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true" calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" label="Data Mapping" max_length="40" name="data_mapping" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" default="javascript:current.outbound_definition.definition_partner.number;" label="Definition Partner" max_length="32" name="definition_partner" reference="x_sccpl_serv_conn_definition_partner" type="reference"/>
+        <element label="External Field" max_length="200" name="external_field" type="string"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Inbound Definition" max_length="32" name="inbound_definition" reference="x_sccpl_serv_conn_inbound_definition" type="reference"/>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Integration Type" max_length="40" name="integration_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Inbound" sequence="10" value="inbound"/>
+                <element inactive_on_update="false" label="Outbound" sequence="20" value="outbound"/>
+                <element inactive_on_update="false" label="Both" sequence="30" value="both"/>
+            </choice>
+        </element>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" label="Outbound Definition" max_length="32" name="outbound_definition" reference="x_sccpl_serv_conn_outbound_definition" reference_qual="active=true^EQ" reference_qual_condition="active=true^EQ" type="reference"/>
+        <element label="SCC Field" max_length="200" name="scc_field" type="string"/>
+        <element attributes="edge_encryption_enabled=true" default="// input: scc field value if integration type is inbound&#13;&#10;//               external value from payload if integration type is outbound&#13;&#10;//---------------------------------------------------------------------------------------&#13;&#10;// output: value need to be return&#13;&#10;&#13;&#10;(function process() {&#13;&#10;&#9;&#13;&#10;&#9;// output = input;&#13;&#10;&#9;&#13;&#10;&#13;&#10;&#13;&#10;&#13;&#10;&#13;&#10;})(output);" label="Script" max_length="8000" name="script" type="script"/>
+        <element attributes="edge_encryption_enabled=true" choice="3" default="always" label="Supply Value" max_length="40" name="supply_value" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Insert and Update" sequence="10" value="insert_and_update"/>
+                <element inactive_on_update="false" label="Insert" sequence="20" value="insert"/>
+                <element inactive_on_update="false" label="Update" sequence="30" value="update"/>
+                <element inactive_on_update="false" label="Always" sequence="40" value="always"/>
+            </choice>
+        </element>
+        <index name="index">
+            <element name="outbound_definition"/>
+        </index>
+        <index name="index2">
+            <element name="inbound_definition"/>
+        </index>
+        <index name="index3">
+            <element name="definition_partner"/>
+        </index>
+    </element>
+</database>

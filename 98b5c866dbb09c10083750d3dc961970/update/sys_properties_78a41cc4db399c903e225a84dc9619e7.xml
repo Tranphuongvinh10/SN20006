@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>Retry interval held in seconds&#13;
+&#13;
+300 = 5 minutes</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_sccpl_serv_conn.SConnector.retryInterval</name>
+        <read_roles/>
+        <suffix>SConnector.retryInterval</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>QuanTH</sys_created_by>
+        <sys_created_on>2020-06-29 08:31:00</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>78a41cc4db399c903e225a84dc9619e7</sys_id>
+        <sys_mod_count>8</sys_mod_count>
+        <sys_name>x_sccpl_serv_conn.SConnector.retryInterval</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_properties_78a41cc4db399c903e225a84dc9619e7</sys_update_name>
+        <sys_updated_by>ThuyTTP</sys_updated_by>
+        <sys_updated_on>2021-02-05 04:35:55</sys_updated_on>
+        <type>string</type>
+        <value>300</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=78a41cc4db399c903e225a84dc9619e7"/>
+</record_update>

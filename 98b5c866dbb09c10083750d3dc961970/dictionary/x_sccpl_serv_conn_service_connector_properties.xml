@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="Service Connector Properties" max_length="40" name="x_sccpl_serv_conn_service_connector_properties" sizeclass="0" type="collection">
+        <element label="Description" max_length="2000" name="description" type="string"/>
+        <element hint="[customer].[name]" label="Name" max_length="100" name="name" type="string"/>
+        <element choice="1" default="string" label="Type" max_length="40" name="type" type="string">
+            <choice>
+                <element inactive_on_update="false" label="String" sequence="100" value="string"/>
+                <element inactive_on_update="false" label="Password" sequence="200" value="password"/>
+            </choice>
+        </element>
+        <element label="Value" max_length="1000" name="value" type="string"/>
+    </element>
+</database>

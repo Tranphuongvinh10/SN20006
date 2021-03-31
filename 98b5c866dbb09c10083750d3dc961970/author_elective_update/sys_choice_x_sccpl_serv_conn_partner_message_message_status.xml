@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_choice action="INSERT_OR_UPDATE" field="message_status" table="x_sccpl_serv_conn_partner_message" version="3">
+        <sys_choice_set action="INSERT_OR_UPDATE">
+            <element>message_status</element>
+            <name>x_sccpl_serv_conn_partner_message</name>
+            <sys_class_name>sys_choice_set</sys_class_name>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-05-20 03:03:17</sys_created_on>
+            <sys_customer_update>false</sys_customer_update>
+            <sys_id>3bd704f9dbfb1cd04243fdf2f3961930</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>message_status</sys_name>
+            <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+            <sys_update_name>sys_choice_x_sccpl_serv_conn_partner_message_message_status</sys_update_name>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-05-20 03:03:17</sys_updated_on>
+        </sys_choice_set>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>message_status</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Insert</label>
+            <language>en</language>
+            <name>x_sccpl_serv_conn_partner_message</name>
+            <sequence>10</sequence>
+            <synonyms/>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-05-20 03:03:17</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>ca4ac1cbdbbc98503e225a84dc9619e5</sys_id>
+            <sys_mod_count>3</sys_mod_count>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-05-25 03:13:55</sys_updated_on>
+            <value>inserted</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>message_status</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Pending</label>
+            <language>en</language>
+            <name>x_sccpl_serv_conn_partner_message</name>
+            <sequence>20</sequence>
+            <synonyms/>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-05-20 03:03:35</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>ca5a81cbdbbc98503e225a84dc9619ea</sys_id>
+            <sys_mod_count>2</sys_mod_count>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-05-20 03:03:45</sys_updated_on>
+            <value>pending</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>message_status</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Processed</label>
+            <language>en</language>
+            <name>x_sccpl_serv_conn_partner_message</name>
+            <sequence>30</sequence>
+            <synonyms/>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-05-20 03:03:54</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>9e6a458bdbbc98503e225a84dc9619f0</sys_id>
+            <sys_mod_count>2</sys_mod_count>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-05-20 03:04:12</sys_updated_on>
+            <value>processed</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>message_status</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Expired</label>
+            <language>en</language>
+            <name>x_sccpl_serv_conn_partner_message</name>
+            <sequence>40</sequence>
+            <synonyms/>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-05-20 03:04:21</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>c37a4d8bdbbc98503e225a84dc961920</sys_id>
+            <sys_mod_count>2</sys_mod_count>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-05-20 03:04:32</sys_updated_on>
+            <value>expired</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>message_status</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Error</label>
+            <language>en</language>
+            <name>x_sccpl_serv_conn_partner_message</name>
+            <sequence>50</sequence>
+            <synonyms/>
+            <sys_created_by>VinhTr</sys_created_by>
+            <sys_created_on>2020-05-20 03:04:40</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>699ac1cbdbbc98503e225a84dc9619e6</sys_id>
+            <sys_mod_count>2</sys_mod_count>
+            <sys_updated_by>VinhTr</sys_updated_by>
+            <sys_updated_on>2020-05-20 03:04:49</sys_updated_on>
+            <value>error</value>
+        </sys_choice>
+    </sys_choice>
+</record_update>

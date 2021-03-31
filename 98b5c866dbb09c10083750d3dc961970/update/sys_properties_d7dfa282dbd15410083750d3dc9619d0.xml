@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>meraki.ip.checking: true =&gt; The inbound messages integrate must be checked the current IP before processing integration</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_sccpl_serv_conn.meraki.ip.checking</name>
+        <read_roles/>
+        <suffix>meraki.ip.checking</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>VinhTr</sys_created_by>
+        <sys_created_on>2020-06-11 04:26:41</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>d7dfa282dbd15410083750d3dc9619d0</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>x_sccpl_serv_conn.meraki.ip.checking</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_properties_d7dfa282dbd15410083750d3dc9619d0</sys_update_name>
+        <sys_updated_by>VinhTr</sys_updated_by>
+        <sys_updated_on>2020-06-12 08:21:12</sys_updated_on>
+        <type>boolean</type>
+        <value>false</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=d7dfa282dbd15410083750d3dc9619d0"/>
+</record_update>

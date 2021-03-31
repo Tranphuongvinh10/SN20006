@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>When an incident is created from an 'application' CI&#13;
+&#13;
+Then the Symptom Category should default to 'Business Application' and the Symptom field should default to 'Error'</description>
+        <ignore_cache>false</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_sccpl_serv_conn.rac.subcategory.for.application</name>
+        <read_roles/>
+        <suffix>rac.subcategory.for.application</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>VinhTr</sys_created_by>
+        <sys_created_on>2020-07-24 04:16:03</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>3a3a0cc4db5e5090083750d3dc9619ab</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_sccpl_serv_conn.rac.subcategory.for.application</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_properties_3a3a0cc4db5e5090083750d3dc9619ab</sys_update_name>
+        <sys_updated_by>VinhTr</sys_updated_by>
+        <sys_updated_on>2020-07-24 04:16:03</sys_updated_on>
+        <type>string</type>
+        <value>Error</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=3a3a0cc4db5e5090083750d3dc9619ab"/>
+</record_update>

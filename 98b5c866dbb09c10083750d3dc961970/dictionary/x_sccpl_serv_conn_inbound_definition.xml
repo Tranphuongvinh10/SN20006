@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element audit="true" label="Inbound Definition" max_length="40" name="x_sccpl_serv_conn_inbound_definition" sizeclass="0" type="collection">
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Action" max_length="40" name="action" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Insert" sequence="10" value="insert"/>
+                <element inactive_on_update="false" label="Update" sequence="20" value="update"/>
+            </choice>
+        </element>
+        <element attributes="edge_encryption_enabled=true" default="true" label="Active" max_length="40" name="active" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true" label="Advanced Action" max_length="40" name="advanced_action" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true" default="// This script is passed a message object of name/value pairs for the incoming message&#13;&#10;// Will only return true/false&#13;&#10;answer = false;&#13;&#10;//if(conditions) {&#13;&#10;//   answer = true;&#13;&#10;//}" label="Condition" max_length="8000" name="condition" type="script"/>
+        <element attributes="edge_encryption_enabled=true" calculation="(function calculatedFieldValue(current) {&#13;&#10;&#13;&#10;&#9;// Add your code here&#13;&#10;&#9;return '';  // return the calculated value&#13;&#10;&#13;&#10;})(current);" label="Default Catalogue Item" max_length="40" name="default_cat_item" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Definition Partner" mandatory="true" max_length="32" name="definition_partner" reference="x_sccpl_serv_conn_definition_partner" type="reference"/>
+        <element label="Description" max_length="4000" name="description" type="string"/>
+        <element label="Key Field" max_length="150" name="key_field" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Match User Name" max_length="40" name="match_user_name" type="boolean"/>
+        <element label="Name" max_length="300" name="name" type="string"/>
+        <element attributes="ignore_filter_on_new=true" default="javascript:global.getNextObjNumberPadded();" display="true" label="Number" mandatory="true" max_length="40" name="number" read_only="true" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Order" max_length="40" name="order" type="integer"/>
+        <element attributes="edge_encryption_enabled=true" default="//current: this inbound definition record&#13;&#10;//message: request payload&#13;&#10;//table: return a new table name if needed&#13;&#10;//action: return a new custom action if needed&#13;&#10;//error_flag: default is false; turn it to true if needed&#13;&#10;//error_cdoe: interger value&#13;&#10;//error_message: string error message&#13;&#10;(function process() {&#13;&#10;&#9;&#13;&#10;&#9;// Enter your code here&#13;&#10;&#9;&#13;&#10;})(current, message, table, action, error_flag, error_code, error_message);" label="Script" max_length="8000" name="script" type="script"/>
+        <element attributes="base_start=true,edge_encryption_enabled=true" label="Table" mandatory="true" max_length="80" name="table" type="table_name"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Template" max_length="32" name="template" reference="sys_template" type="reference"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="User Name" max_length="32" name="user_name" reference="sys_user" type="reference"/>
+        <index name="index">
+            <element name="template"/>
+        </index>
+        <index name="index2">
+            <element name="user_name"/>
+        </index>
+        <index name="index3">
+            <element name="definition_partner"/>
+        </index>
+    </element>
+</database>

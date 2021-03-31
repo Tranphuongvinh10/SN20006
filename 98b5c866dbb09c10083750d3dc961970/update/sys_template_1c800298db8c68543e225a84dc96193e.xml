@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_template">
+    <sys_template action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <global>true</global>
+        <group/>
+        <groups/>
+        <link_element/>
+        <name>OWorx Integration create incident</name>
+        <next/>
+        <next_child/>
+        <roles/>
+        <short_description>OWorx Integration create incident template</short_description>
+        <show_on_template_bar>true</show_on_template_bar>
+        <stand_alone>false</stand_alone>
+        <sys_class_name>sys_template</sys_class_name>
+        <sys_created_by>VinhTr</sys_created_by>
+        <sys_created_on>2020-10-20 07:23:51</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>1c800298db8c68543e225a84dc96193e</sys_id>
+        <sys_mod_count>9</sys_mod_count>
+        <sys_name>OWorx Integration create incident</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_template_1c800298db8c68543e225a84dc96193e</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2020-10-29 06:53:34</sys_updated_on>
+        <table>incident</table>
+        <template>u_is_the_caller_the_affected_user=Yes^u_colleague_affected=No^contact_type=Integration^assignment_group=605263dcdb7bb3849c6e9eb1ca9619eb^state=1^u_action_required=true^EQ</template>
+        <user/>
+        <view/>
+    </sys_template>
+</record_update>

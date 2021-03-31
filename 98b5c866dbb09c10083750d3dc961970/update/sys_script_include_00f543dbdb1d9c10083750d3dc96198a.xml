@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_sccpl_serv_conn.ServiceConnectorRequestClass</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>ServiceConnectorRequestClass</name>
+        <script><![CDATA[var ServiceConnectorRequestClass = Class.create();
+ServiceConnectorRequestClass.prototype = Object.extendsObject(ServiceConnectorModel, {
+	initialize: function () {
+		this.commonAction = new ServiceConnectorCommonAction();
+
+		// Get default catalogue item.
+		this.itemId = gs.getProperty("x_sccpl_serv_conn.SConnector.default_catalogue_item_id");
+	},
+
+	insertRequest: function (data, template) {
+		try {
+			var k;
+			var gr = new GlideRecord(this.TABLE_NAME.REQUEST);
+			gr.initialize();
+			if (template) {
+				var grTemplate = new GlideTemplate.get(template);
+				grTemplate.apply(gr);
+			}
+			for (k in data) {
+				gr[k] = data[k];
+			}
+			gr.contact_type = "Integration";
+			gr.insert();
+			return gr;
+		} catch (ex) {
+			gs.info("Insert Request Fail: ", ex);
+			this.logWarning('Insert request error: \n' + ex, 'insertRequest');
+		}
+	},
+
+	updateRequest: function (sccRecordId, data, template) {
+		try {
+			var gr = new GlideRecord(this.TABLE_NAME.REQUEST);
+			gr.get(sccRecordId);
+			var k;
+			if (template) {
+				var grTemplate = new GlideTemplate.get(template);
+				grTemplate.apply(gr);
+			}
+			for (k in data) {
+				if (k != 'company') {
+					gr[k] = data[k];
+				}
+			}
+			gr.update();
+			return gr;
+		} catch (ex) {
+			gs.info("Update Request Fail: ", ex);
+			this.logWarning('Update request error: \n' + ex, 'updateRequest');
+		}
+	},
+
+	/** 
+	 * Description : Insert a request item
+	 * @param {object} data this.DATA
+     * @param {string} template sys_id
+     * @returns {object} sccRecord
+	 */
+	insertRITM: function (data, template) {
+		try {
+			var catItem = this.commonAction.catalogueItemLookup(data.ritm.cat_item);
+			this.itemId = catItem.getValue("sys_id");
+			delete data.ritm.cat_item;
+
+			var k, reqNumber;
+			var cartID = gs.generateGUID();
+			var cart = new global.Cart(cartID);
+			var item = cart.addItem(this.itemId);
+
+			var variables = new GlideRecord(this.TABLE_NAME.ITEM_OPTION_NEW);
+
+			variables.addQuery("cat_item", this.itemId);
+			variables.query();
+			while (variables.next()) {
+				cart.setVariable(item, variables.name, String(data.ritm[variables.name]));
+			}
+
+			var request = cart.placeOrder();
+			for (k in data) {
+				request[k] = data[k];
+			}
+			request.contact_type = "Integration";
+			request.update();
+
+			reqNumber = request.number;
+			var ritm = this._getRequestItem(reqNumber);
+			if (template) {
+				var grTemplate = new GlideTemplate.get(template);
+				grTemplate.apply(ritm);
+			}
+			for (k in data.ritm) {
+				ritm[k] = data.ritm[k];
+			}
+			ritm.contact_type = "Integration";
+			ritm.update();
+
+			return ritm;
+		} catch (ex) {
+			gs.info("Insert Request Item Fail: ", ex);
+			this.logWarning('Insert request item error: \n' + ex, 'insertRITM');
+		}
+	},
+
+	/**
+    * Description : Update a request item
+    * @param {string} sccRecordId
+	* @param {object} data
+	* @param {sys_id} template
+	*/
+	updateRitm: function (sccRecordId, data, template) {
+		try {
+			// Catalog item is not allow for update
+			delete data.ritm.cat_item;
+
+			var gr = new GlideRecord(this.TABLE_NAME.RITM);
+			gr.get(sccRecordId);
+			var k, m;
+			if (template) {
+				var grTemplate = new GlideTemplate.get(template);
+				grTemplate.apply(gr);
+			}
+			for (k in data.ritm) {
+				if (k != 'company') {
+					gr[k] = data.ritm[k];
+					for (m in gr.variables) {
+						if (m == k) {
+							gr.variables[m] = data.ritm[k];
+						}
+					}
+				}
+			}
+			gr.update();
+			return gr;
+		} catch (ex) {
+			gs.info("Update Request Item Fail: ", ex);
+			this.logWarning('Update request item error: \n' + ex, 'updateRitm');
+		}
+	},
+
+	/**
+    * Description : Insert a catalogue task
+	* @param {object} data this.DATA
+	* @param {sys_id} template
+	* @returns {object} sccRecord
+	*/
+	insertCatalogTask: function (data, template) {
+		try {
+			var gr = new GlideRecord(this.TABLE_NAME.SC_TASK);
+			gr.initialize();
+			if (template) {
+				var grTemplate = new GlideTemplate.get(template);
+				grTemplate.apply(gr);
+			}
+			for (k in data.scTask) {
+				gr[k] = data.scTask[k];
+			}
+			gr.contact_type = "Integration";
+			gr.insert();
+			return gr;
+		} catch (ex) {
+			gs.info("Update Request Item Fail: ", ex);
+			this.logWarning('Update request item error: \n' + ex, 'updateRitm');
+		}
+	},
+
+	/** 
+	 * Description : Insert a catalogue task by order default catalogue item
+	 * @param {object} data this.DATA
+     * @param {string} template sys_id
+     * @returns {object} sccRecord
+	 */
+	insertDefaultCatalogTask: function (data, template) {
+		try {
+			delete data.ritm.cat_item, data.scTask.request_item;
+
+			var k, reqNumber;
+			var cartID = gs.generateGUID();
+			var cart = new global.Cart(cartID);
+			var item = cart.addItem(this.itemId);
+			var variables = new GlideRecord(this.TABLE_NAME.ITEM_OPTION_NEW);
+			variables.addQuery("cat_item", this.itemId);
+			variables.query();
+			while (variables.next()) {
+				cart.setVariable(item, variables.name, String(data.ritm[variables.name]));
+			}
+			var request = cart.placeOrder();
+
+			for (k in data) {
+				request[k] = data[k];
+			}
+
+			request.contact_type = "Integration";
+			request.update();
+
+			reqNumber = request.number;
+			var ritm = this._getRequestItem(reqNumber);
+
+			for (k in data.ritm) {
+				ritm[k] = data.ritm[k];
+			}
+			ritmId.contact_type = "Integration";
+			var ritmId = ritm.update();
+
+			var scTask = new GlideRecord(this.TABLE_NAME.SC_TASK);
+			scTask.addQuery("request_item", ritmId);
+			scTask.addQuery("active", true);
+			scTask.setLimit(1);
+			scTask.query();
+			if (scTask.next()) {
+				if (template) {
+					var grTemplate = new GlideTemplate.get(template);
+					grTemplate.apply(scTask);
+				}
+				for (k in data.scTask) {
+					scTask[k] = data.scTask[k];
+				}
+				scTask.contact_type = "Integration";
+				scTask.update();
+			}
+			return scTask;
+		} catch (ex) {
+			gs.info("Insert Default Catalogue Item Fail: ", ex);
+			this.logWarning('Insert default catalogue item error: \n' + ex, 'insertDefaultCatalogTask');
+		}
+	},
+
+	/**
+    * Description : Update a catalogue task
+    * @param {string} sccRecordId
+	* @param {object} data
+	* @param {sys_id} template
+	*/
+	updateCatalogueTask: function (sccRecordId, data, template) {
+		try {
+			var gr = new GlideRecord(this.TABLE_NAME.SC_TASK);
+			gr.get(sccRecordId);
+			var k;
+			if (template) {
+				var grTemplate = new GlideTemplate.get(template);
+				grTemplate.apply(gr);
+			}
+			for (k in data.scTask) {
+				if (k != 'company') {
+					gr[k] = data.scTask[k];
+				}
+			}
+			gr.update();
+			return gr;
+		} catch (ex) {
+			gs.info("Update Catalogue Item Fail: ", ex);
+			this.logWarning('Update catalogue item error: \n' + ex, 'updateCatalogueTask');
+		}
+	},
+
+	/**  ====================================*/
+	/**      PRIVATE FUNCTIONS */
+	/**===================================== */
+
+	/** 
+	 * Description : Get catalogue task id
+     * @param {string} itemName
+     * @returns {string} sys_id
+	 */
+	_getCatalogueItemId: function (itemName) {
+		var catItem = new GlideRecord(this.TABLE_NAME.SC_CAT_ITEM);
+		catItem.get("name", itemName);
+		return cat_item.sys_id || "";
+	},
+
+	/** 
+	 * Description : Get a request item
+     * @param {string} requestNumber sys_id
+     * @returns {object}
+	 */
+	_getRequestItem: function (requestNumber) {
+		var gr = new GlideRecord(this.TABLE_NAME.RITM);
+		gr.get("request.number", requestNumber);
+		return gr;
+	},
+
+	type: 'ServiceConnectorRequestClass'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>VinhTr</sys_created_by>
+        <sys_created_on>2020-06-15 03:16:30</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_id>00f543dbdb1d9c10083750d3dc96198a</sys_id>
+        <sys_mod_count>70</sys_mod_count>
+        <sys_name>ServiceConnectorRequestClass</sys_name>
+        <sys_package display_value="Service Connector" source="x_sccpl_serv_conn">98b5c866dbb09c10083750d3dc961970</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Service Connector">98b5c866dbb09c10083750d3dc961970</sys_scope>
+        <sys_update_name>sys_script_include_00f543dbdb1d9c10083750d3dc96198a</sys_update_name>
+        <sys_updated_by>QuanTH</sys_updated_by>
+        <sys_updated_on>2020-10-29 07:34:34</sys_updated_on>
+    </sys_script_include>
+</record_update>
